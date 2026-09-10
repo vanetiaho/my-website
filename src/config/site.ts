@@ -14,44 +14,26 @@ export const profile = {
   [your focus, e.g. web platforms / distributed systems / creative frontend].`,
   location: 'Singapore',
   email: 'vangs.vanetia@gmail.com',
-  resumeUrl: '', // link to a hosted PDF, or leave blank to hide the button
   avatarUrl: '', // optional headshot / illustration, leave blank for none
 }
 
 export const socials = {
   github: 'vanetiaho',
   linkedin: 'vanetia',
-  twitter: '[your-twitter-handle]',
 }
 
-export const skillCategories = [
-  {
-    category: 'Languages',
-    skills: [
-      { name: 'TypeScript', level: 88 },
-      { name: 'JavaScript', level: 90 },
-      { name: 'Python', level: 75 },
-      { name: 'SQL', level: 78 },
-    ],
-  },
-  {
-    category: 'Frontend',
-    skills: [
-      { name: 'React', level: 92 },
-      { name: 'Tailwind CSS', level: 85 },
-      { name: 'Three.js / R3F', level: 60 },
-      { name: 'Next.js', level: 78 },
-    ],
-  },
-  {
-    category: 'Backend',
-    skills: [
-      { name: 'Node.js', level: 85 },
-      { name: 'PostgreSQL', level: 78 },
-      { name: 'REST / GraphQL APIs', level: 80 },
-      { name: 'Docker', level: 70 },
-    ],
-  },
+// Used only as a fallback if the live GitHub language fetch (below) fails or
+// github.username isn't set — otherwise the About page shows real languages
+// pulled straight from your public repos.
+export const fallbackSkills = [
+  'TypeScript',
+  'JavaScript',
+  'Python',
+  'React',
+  'Tailwind CSS',
+  'Node.js',
+  'PostgreSQL',
+  'Docker',
 ]
 
 export type Project = {
@@ -64,6 +46,9 @@ export type Project = {
   featured?: boolean
 }
 
+// Used only as a fallback if the live GitHub repos fetch fails or
+// github.username isn't set — otherwise /projects and the homepage preview
+// pull real, up-to-date repos straight from your GitHub account.
 export const projects: Project[] = [
   {
     id: 'project-alpha',

@@ -130,19 +130,32 @@ export default function PlaneGame() {
       ctx.translate(planeX, plane.current.y)
       const angle = Math.max(-0.5, Math.min(0.9, plane.current.vy * 0.06))
       ctx.rotate(angle)
+
+      // Fuselage
       ctx.fillStyle = '#f4ead9'
       ctx.beginPath()
-      ctx.moveTo(-18, 0)
-      ctx.lineTo(14, -6)
-      ctx.lineTo(20, 0)
-      ctx.lineTo(14, 6)
+      ctx.moveTo(24, 0)
+      ctx.lineTo(-8, -8)
+      ctx.lineTo(-2, 0)
+      ctx.lineTo(-8, 8)
       ctx.closePath()
       ctx.fill()
+
+      // Upper wing fold
       ctx.fillStyle = '#f4b860'
       ctx.beginPath()
-      ctx.moveTo(-4, 0)
-      ctx.lineTo(-16, -14)
-      ctx.lineTo(-6, -2)
+      ctx.moveTo(11, -1.5)
+      ctx.lineTo(-7, -13)
+      ctx.lineTo(0, -1.5)
+      ctx.closePath()
+      ctx.fill()
+
+      // Tail fin
+      ctx.fillStyle = '#c1502e'
+      ctx.beginPath()
+      ctx.moveTo(-2, 0)
+      ctx.lineTo(-11, -6.5)
+      ctx.lineTo(-9, 0)
       ctx.closePath()
       ctx.fill()
       ctx.restore()

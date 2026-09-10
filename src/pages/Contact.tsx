@@ -5,7 +5,6 @@ import { profile, socials } from '@/config/site'
 const SOCIAL_LINKS = [
   { label: 'GitHub', href: `https://github.com/${socials.github}` },
   { label: 'LinkedIn', href: `https://linkedin.com/in/${socials.linkedin}` },
-  { label: 'Twitter / X', href: `https://twitter.com/${socials.twitter}` },
   { label: 'Email', href: `mailto:${profile.email}` },
 ]
 

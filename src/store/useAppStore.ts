@@ -5,8 +5,6 @@ const ENTRANCE_KEY = 'sunset-portfolio:entered'
 type AppState = {
   hasEntered: boolean
   markEntered: () => void
-  cursorVariant: 'default' | 'hover'
-  setCursorVariant: (v: 'default' | 'hover') => void
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -18,6 +16,4 @@ export const useAppStore = create<AppState>((set) => ({
     }
     set({ hasEntered: true })
   },
-  cursorVariant: 'default',
-  setCursorVariant: (v) => set({ cursorVariant: v }),
 }))

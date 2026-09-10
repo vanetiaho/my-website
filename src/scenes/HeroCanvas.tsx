@@ -27,9 +27,67 @@ function SunsetSphere() {
   )
 }
 
+function OtterPilot(props: ThreeElements['group']) {
+  const fur = '#8a5a3b'
+  const furDark = '#6b432b'
+  const belly = '#e0bd94'
+  return (
+    <group {...props}>
+      {/* Body */}
+      <mesh position={[0, 0, 0]} scale={[1, 0.85, 1.15]}>
+        <sphereGeometry args={[0.14, 14, 14]} />
+        <meshStandardMaterial color={fur} roughness={0.8} flatShading />
+      </mesh>
+      {/* Belly */}
+      <mesh position={[0, -0.03, 0.1]} scale={[0.75, 0.65, 0.7]}>
+        <sphereGeometry args={[0.13, 12, 12]} />
+        <meshStandardMaterial color={belly} roughness={0.8} flatShading />
+      </mesh>
+      {/* Head */}
+      <mesh position={[0, 0.14, 0.08]}>
+        <sphereGeometry args={[0.095, 14, 14]} />
+        <meshStandardMaterial color={fur} roughness={0.8} flatShading />
+      </mesh>
+      {/* Snout */}
+      <mesh position={[0, 0.12, 0.17]} scale={[0.8, 0.65, 0.9]}>
+        <sphereGeometry args={[0.06, 10, 10]} />
+        <meshStandardMaterial color={belly} roughness={0.8} flatShading />
+      </mesh>
+      {/* Nose */}
+      <mesh position={[0, 0.135, 0.215]}>
+        <sphereGeometry args={[0.018, 6, 6]} />
+        <meshStandardMaterial color="#2a1c12" />
+      </mesh>
+      {/* Ears */}
+      <mesh position={[-0.075, 0.21, 0.06]}>
+        <sphereGeometry args={[0.026, 6, 6]} />
+        <meshStandardMaterial color={furDark} flatShading />
+      </mesh>
+      <mesh position={[0.075, 0.21, 0.06]}>
+        <sphereGeometry args={[0.026, 6, 6]} />
+        <meshStandardMaterial color={furDark} flatShading />
+      </mesh>
+      {/* Arms reaching forward as if gripping the controls */}
+      <mesh position={[-0.1, 0.01, 0.12]} rotation={[0.5, 0, 0.35]}>
+        <capsuleGeometry args={[0.022, 0.1, 4, 6]} />
+        <meshStandardMaterial color={fur} flatShading />
+      </mesh>
+      <mesh position={[0.1, 0.01, 0.12]} rotation={[0.5, 0, -0.35]}>
+        <capsuleGeometry args={[0.022, 0.1, 4, 6]} />
+        <meshStandardMaterial color={fur} flatShading />
+      </mesh>
+      {/* Tail trailing behind */}
+      <mesh position={[0, -0.06, -0.2]} rotation={[1.35, 0, 0]}>
+        <coneGeometry args={[0.055, 0.26, 8]} />
+        <meshStandardMaterial color={furDark} flatShading />
+      </mesh>
+    </group>
+  )
+}
+
 function PaperPlane(props: ThreeElements['group']) {
   return (
-    <group {...props} rotation={[0.15, 2.4, -0.1]} scale={0.9}>
+    <group {...props} rotation={[0.15, 2.4, -0.1]} scale={1.25}>
       {/* Fuselage */}
       <mesh position={[0, 0, 0.3]} rotation={[Math.PI / 2, 0, 0]}>
         <coneGeometry args={[0.16, 1.3, 4]} />
@@ -45,6 +103,8 @@ function PaperPlane(props: ThreeElements['group']) {
         <coneGeometry args={[0.05, 0.85, 3]} />
         <meshStandardMaterial color="#f4b860" flatShading roughness={0.6} />
       </mesh>
+      {/* Otter pilot, riding just behind the nose */}
+      <OtterPilot position={[0, 0.19, 0.35]} scale={1.35} />
     </group>
   )
 }
@@ -62,7 +122,7 @@ function Rig({ reduced }: { reduced: boolean }) {
     <group ref={group}>
       <Float speed={1.6} rotationIntensity={0.4} floatIntensity={0.8}>
         <SunsetSphere />
-        <PaperPlane position={[1.6, 0.4, 0.8]} />
+        <PaperPlane position={[0.85, 0.25, 1.3]} />
       </Float>
     </group>
   )

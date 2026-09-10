@@ -21,13 +21,11 @@ export default function Navbar() {
   }, [])
 
   return (
-    <motion.header
-      initial={{ y: -40, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed left-1/2 top-4 z-[80] -translate-x-1/2"
-    >
-      <nav
+    <header className="fixed left-1/2 top-4 z-[80] -translate-x-1/2">
+      <motion.nav
+        initial={{ y: -40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className={`glass-panel flex items-center gap-1 rounded-full px-2 py-2 shadow-glow-sm transition-all duration-300 ${
           scrolled ? 'scale-95 gap-0.5 px-1.5 py-1.5' : ''
         }`}
@@ -64,7 +62,7 @@ export default function Navbar() {
             )}
           </NavLink>
         ))}
-      </nav>
-    </motion.header>
+      </motion.nav>
+    </header>
   )
 }

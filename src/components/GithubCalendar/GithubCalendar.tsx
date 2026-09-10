@@ -44,6 +44,7 @@ export default function GithubCalendar() {
     }
 
     const controller = new AbortController()
+    const timeout = window.setTimeout(() => controller.abort(), 8000)
     fetch(`https://github-contributions-api.jogruber.de/rest/v1/${username}?y=last`, {
       signal: controller.signal,
     })
@@ -56,8 +57,12 @@ export default function GithubCalendar() {
         setStatus('ready')
       })
       .catch(() => setStatus('error'))
+      .finally(() => window.clearTimeout(timeout))
 
-    return () => controller.abort()
+    return () => {
+      window.clearTimeout(timeout)
+      controller.abort()
+    }
   }, [])
 
   if (status === 'unset') {

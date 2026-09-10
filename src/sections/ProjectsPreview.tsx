@@ -1,9 +1,15 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { projects } from '@/config/site'
+import { projects as fallbackProjects } from '@/config/site'
+import { useGithubRepos } from '@/hooks/useGithubRepos'
+import { reposToProjects } from '@/lib/github'
 
 export default function ProjectsPreview() {
-  const featured = projects.filter((p) => p.featured).slice(0, 3)
+  const { repos, status } = useGithubRepos()
+  const featured =
+    status === 'ready' && repos.length > 0
+      ? reposToProjects(repos).slice(0, 3)
+      : fallbackProjects.filter((p) => p.featured).slice(0, 3)
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-24 lg:px-8">

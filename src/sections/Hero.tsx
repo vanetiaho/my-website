@@ -18,7 +18,25 @@ export default function Hero() {
         >
           <p className="section-label mb-4">// welcome aboard</p>
           <h1 className="text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
-            {profile.name}
+            <motion.span
+              className="interactive relative inline-block cursor-default"
+              whileHover="hover"
+              initial="rest"
+            >
+              <motion.span
+                className="relative inline-block"
+                variants={{ rest: { y: 0 }, hover: { y: -2 } }}
+                transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+              >
+                {profile.name}
+              </motion.span>
+              <motion.span
+                aria-hidden="true"
+                className="absolute -bottom-1 left-0 h-[3px] w-full origin-left rounded-full bg-gradient-to-r from-sunset-gold via-sunset-amber to-sunset-burnt"
+                variants={{ rest: { scaleX: 0, opacity: 0 }, hover: { scaleX: 1, opacity: 1 } }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+              />
+            </motion.span>
             <span className="mt-2 block text-2xl font-medium text-neutral-400 sm:text-3xl">
               <span className="text-gradient-sunset">{profile.role}</span>
             </span>
@@ -60,15 +78,6 @@ export default function Hero() {
           </p>
         </motion.div>
       </div>
-
-      <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-neutral-500"
-        animate={{ y: [0, 8, 0] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-        aria-hidden="true"
-      >
-        ↓
-      </motion.div>
     </section>
   )
 }

@@ -1,7 +1,13 @@
 import { motion } from 'framer-motion'
-import { profile, skillCategories } from '@/config/site'
+import { profile, fallbackSkills } from '@/config/site'
+import { useGithubRepos } from '@/hooks/useGithubRepos'
+import { languagesFromRepos } from '@/lib/github'
 
 export default function About() {
+  const { repos, status } = useGithubRepos()
+  const languages = status === 'ready' ? languagesFromRepos(repos) : []
+  const skills = languages.length > 0 ? languages : fallbackSkills
+
   return (
     <section id="about" className="mx-auto max-w-6xl px-6 py-24 lg:px-8">
       <motion.p
@@ -33,53 +39,39 @@ export default function About() {
           <p className="mt-4 font-mono text-sm text-neutral-500">
             📍 {profile.location}
           </p>
-          {profile.resumeUrl && (
-            <a
-              href={profile.resumeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="interactive mt-6 inline-block rounded-full border border-white/15 px-5 py-2.5 font-mono text-sm text-neutral-200 hover:border-sunset-amber/60 hover:text-sunset-gold"
-            >
-              View resume ↗
-            </a>
-          )}
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:col-span-3">
-          {skillCategories.map((cat, i) => (
-            <motion.div
-              key={cat.category}
-              className="glass-panel rounded-2xl p-5"
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-            >
-              <h3 className="mb-4 font-mono text-sm uppercase tracking-wide text-sunset-amber">
-                {cat.category}
-              </h3>
-              <ul className="space-y-3">
-                {cat.skills.map((skill) => (
-                  <li key={skill.name}>
-                    <div className="mb-1 flex justify-between text-sm text-neutral-300">
-                      <span>{skill.name}</span>
-                      <span className="text-neutral-500">{skill.level}%</span>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                      <motion.div
-                        className="h-full rounded-full bg-gradient-to-r from-sunset-amber to-sunset-gold"
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${skill.level}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.9, ease: 'easeOut' }}
-                      />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
-        </div>
+        <motion.div
+          className="glass-panel rounded-2xl p-6 lg:col-span-3"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h3 className="mb-4 font-mono text-sm uppercase tracking-wide text-sunset-amber">
+            {languages.length > 0 ? 'What I code in, per GitHub' : 'What I work with'}
+          </h3>
+          {status === 'loading' ? (
+            <div className="flex h-16 items-center">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-sunset-amber/30 border-t-sunset-amber" />
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {skills.map((skill, i) => (
+                <motion.span
+                  key={skill}
+                  className="rounded-full bg-white/5 px-3.5 py-1.5 text-sm text-neutral-200"
+                  initial={{ opacity: 0, y: 8 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: i * 0.04 }}
+                >
+                  {skill}
+                </motion.span>
+              ))}
+            </div>
+          )}
+        </motion.div>
       </div>
     </section>
   )
