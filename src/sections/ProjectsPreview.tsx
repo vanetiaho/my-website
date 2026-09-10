@@ -1,23 +1,19 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { pinnedProjects } from '@/config/site'
-import { useGithubRepos } from '@/hooks/useGithubRepos'
-import { mergeWithPinned, reposToProjects } from '@/lib/github'
 import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
 export default function ProjectsPreview() {
-  const { repos, status } = useGithubRepos()
-  const projects =
-    status === 'ready' && repos.length > 0
-      ? mergeWithPinned(reposToProjects(repos), pinnedProjects)
-      : pinnedProjects.map((p) => ({ id: p.repo, ...p }))
-  const featured = projects.slice(0, 3)
+  const featured = pinnedProjects.slice(0, 3)
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-24 lg:px-8">
       <div className="mb-10 flex items-end justify-between">
         <div>
-          <p className="section-label mb-3">{PLANE_GLYPH} pinned.work</p>
+          <p className="section-label mb-3">
+            <span className="mr-1 inline-block align-[-3px] text-base">{PLANE_GLYPH}</span>
+            featured.work
+          </p>
           <h2 className="text-3xl font-bold sm:text-4xl">
             Pinned <span className="text-gradient-sunset">projects</span>
           </h2>
@@ -33,8 +29,8 @@ export default function ProjectsPreview() {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {featured.map((project, i) => (
           <motion.a
-            key={project.id}
-            href={project.github || '#'}
+            key={project.repo}
+            href={project.github}
             target="_blank"
             rel="noopener noreferrer"
             className="interactive group glass-panel relative overflow-hidden rounded-2xl p-6 transition-transform hover:-translate-y-1"

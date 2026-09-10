@@ -38,7 +38,10 @@ export default function Contact() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <p className="section-label mb-3">{PLANE_GLYPH} contact.init()</p>
+          <p className="section-label mb-3">
+            <span className="mr-1 inline-block align-[-3px] text-base">{PLANE_GLYPH}</span>
+            contact.init()
+          </p>
           <h1 className="mb-4 text-3xl font-bold sm:text-4xl">
             Let's build something <span className="text-gradient-sunset">great</span>
           </h1>
@@ -76,7 +79,8 @@ export default function Contact() {
             <form onSubmit={onSubmit} className="space-y-4" noValidate>
               <div>
                 <label htmlFor="name" className="mb-1 block font-mono text-xs text-neutral-400">
-                  {PLANE_GLYPH} name
+                  <span className="mr-1 inline-block align-[-2px] text-sm">{PLANE_GLYPH}</span>
+                  name
                 </label>
                 <input
                   id="name"
@@ -90,7 +94,8 @@ export default function Contact() {
               </div>
               <div>
                 <label htmlFor="email" className="mb-1 block font-mono text-xs text-neutral-400">
-                  {PLANE_GLYPH} email
+                  <span className="mr-1 inline-block align-[-2px] text-sm">{PLANE_GLYPH}</span>
+                  email
                 </label>
                 <input
                   id="email"
@@ -105,7 +110,8 @@ export default function Contact() {
               </div>
               <div>
                 <label htmlFor="message" className="mb-1 block font-mono text-xs text-neutral-400">
-                  {PLANE_GLYPH} message
+                  <span className="mr-1 inline-block align-[-2px] text-sm">{PLANE_GLYPH}</span>
+                  message
                 </label>
                 <textarea
                   id="message"
@@ -138,7 +144,7 @@ export default function Contact() {
           {profile.name} {PLANE_GLYPH} {profile.callsign}
         </p>
         <p className="text-xs text-neutral-600">
-          Built with React, Tailwind, and a soft spot for golden hour. &copy; {new Date().getFullYear()}
+          Built with a soft spot for golden hour. &copy; {new Date().getFullYear()}
         </p>
       </footer>
     </div>

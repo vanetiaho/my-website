@@ -6,7 +6,10 @@ const PlaneGame = lazy(() => import('@/game/PlaneGame'))
 export default function Play() {
   return (
     <div className="mx-auto max-w-4xl px-6 pb-24 pt-32 text-center lg:px-8">
-      <p className="section-label mb-3">{PLANE_GLYPH} easter.egg</p>
+      <p className="section-label mb-3">
+        <span className="mr-1 inline-block align-[-3px] text-base">{PLANE_GLYPH}</span>
+        easter.egg
+      </p>
       <h1 className="mb-3 text-3xl font-bold sm:text-4xl">
         Keep the plane <span className="text-gradient-sunset">flying</span>
       </h1>

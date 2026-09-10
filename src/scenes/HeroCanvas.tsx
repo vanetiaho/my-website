@@ -64,7 +64,7 @@ function OtterPilot(props: ThreeElements['group']) {
 
 function PaperPlane(props: ThreeElements['group']) {
   return (
-    <group {...props} rotation={[0.15, 2.4, -0.1]} scale={2.1}>
+    <group {...props} rotation={[0.15, 2.4, -0.1]} scale={2.5}>
       {/* Fuselage */}
       <mesh position={[0, 0, 0.3]} rotation={[Math.PI / 2, 0, 0]}>
         <coneGeometry args={[0.16, 1.3, 4]} />

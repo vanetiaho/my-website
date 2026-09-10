@@ -1,109 +1,97 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { pinnedProjects } from '@/config/site'
-import { useGithubRepos } from '@/hooks/useGithubRepos'
-import { mergeWithPinned, reposToProjects } from '@/lib/github'
 import GithubCalendar from '@/components/GithubCalendar/GithubCalendar'
 import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
 export default function Projects() {
-  const { repos, status } = useGithubRepos()
   const [filter, setFilter] = useState<string | null>(null)
 
-  const projects = useMemo(() => {
-    if (status === 'ready' && repos.length > 0) {
-      return mergeWithPinned(reposToProjects(repos), pinnedProjects)
-    }
-    return pinnedProjects.map((p) => ({ id: p.repo, ...p }))
-  }, [status, repos])
-
   const allTags = useMemo(
-    () => Array.from(new Set(projects.flatMap((p) => p.tags))),
-    [projects]
+    () => Array.from(new Set(pinnedProjects.flatMap((p) => p.tags))),
+    []
   )
-  const visible = filter ? projects.filter((p) => p.tags.includes(filter)) : projects
+  const visible = filter
+    ? pinnedProjects.filter((p) => p.tags.includes(filter))
+    : pinnedProjects
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-32 lg:px-8">
-      <p className="section-label mb-3">{PLANE_GLYPH} projects.list()</p>
+      <p className="section-label mb-3">
+        <span className="mr-1 inline-block align-[-3px] text-base">{PLANE_GLYPH}</span>
+        projects.list()
+      </p>
       <h1 className="mb-10 text-3xl font-bold sm:text-4xl">
         Things I've <span className="text-gradient-sunset">built</span>
       </h1>
 
       <div className="mb-10">
-        <p className="section-label mb-3">{PLANE_GLYPH} github.activity</p>
+        <p className="section-label mb-3">
+          <span className="mr-1 inline-block align-[-3px] text-base">{PLANE_GLYPH}</span>
+          github.activity
+        </p>
         <GithubCalendar />
       </div>
 
-      {status === 'loading' ? (
-        <div className="glass-panel flex h-40 items-center justify-center rounded-2xl">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-sunset-amber/30 border-t-sunset-amber" />
-        </div>
-      ) : (
-        <>
-          <div className="mb-8 flex flex-wrap gap-2">
-            <button
-              onClick={() => setFilter(null)}
-              className={`interactive rounded-full px-3.5 py-1.5 font-mono text-xs transition-colors ${
-                !filter
-                  ? 'bg-sunset-amber text-base-950'
-                  : 'bg-white/5 text-neutral-400 hover:text-white'
-              }`}
-            >
-              All
-            </button>
-            {allTags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => setFilter(tag)}
-                className={`interactive rounded-full px-3.5 py-1.5 font-mono text-xs transition-colors ${
-                  filter === tag
-                    ? 'bg-sunset-amber text-base-950'
-                    : 'bg-white/5 text-neutral-400 hover:text-white'
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
+      <div className="mb-8 flex flex-wrap gap-2">
+        <button
+          onClick={() => setFilter(null)}
+          className={`interactive rounded-full px-3.5 py-1.5 font-mono text-xs transition-colors ${
+            !filter
+              ? 'bg-sunset-amber text-base-950'
+              : 'bg-white/5 text-neutral-400 hover:text-white'
+          }`}
+        >
+          All
+        </button>
+        {allTags.map((tag) => (
+          <button
+            key={tag}
+            onClick={() => setFilter(tag)}
+            className={`interactive rounded-full px-3.5 py-1.5 font-mono text-xs transition-colors ${
+              filter === tag
+                ? 'bg-sunset-amber text-base-950'
+                : 'bg-white/5 text-neutral-400 hover:text-white'
+            }`}
+          >
+            {tag}
+          </button>
+        ))}
+      </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {visible.map((project, i) => (
-              <motion.div
-                key={project.id}
-                className="glass-panel group relative flex flex-col overflow-hidden rounded-2xl p-6 transition-transform hover:-translate-y-1"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-              >
-                <div className="absolute inset-0 -z-10 bg-sunset-gradient opacity-0 transition-opacity duration-300 group-hover:opacity-15" />
-                <h3 className="mb-2 font-display text-lg font-semibold">{project.title}</h3>
-                <p className="mb-4 flex-1 text-sm text-neutral-400">{project.description}</p>
-                <div className="mb-4 flex flex-wrap gap-2">
-                  {project.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-white/5 px-2.5 py-1 font-mono text-xs text-sunset-amber"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                {project.github && (
-                  <a
-                    href={project.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="interactive font-mono text-xs text-neutral-400 hover:text-sunset-gold"
-                  >
-                    Source ↗
-                  </a>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </>
-      )}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {visible.map((project, i) => (
+          <motion.div
+            key={project.repo}
+            className="glass-panel group relative flex flex-col overflow-hidden rounded-2xl p-6 transition-transform hover:-translate-y-1"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: i * 0.05 }}
+          >
+            <div className="absolute inset-0 -z-10 bg-sunset-gradient opacity-0 transition-opacity duration-300 group-hover:opacity-15" />
+            <h3 className="mb-2 font-display text-lg font-semibold">{project.title}</h3>
+            <p className="mb-4 flex-1 text-sm text-neutral-400">{project.description}</p>
+            <div className="mb-4 flex flex-wrap gap-2">
+              {project.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full bg-white/5 px-2.5 py-1 font-mono text-xs text-sunset-amber"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <a
+              href={project.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="interactive font-mono text-xs text-neutral-400 hover:text-sunset-gold"
+            >
+              Source ↗
+            </a>
+          </motion.div>
+        ))}
+      </div>
     </div>
   )
 }

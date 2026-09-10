@@ -10,7 +10,13 @@ const nameLetters = profile.name.split('')
 export default function Hero() {
   return (
     <section className="relative flex min-h-[100svh] items-center overflow-hidden pt-24">
-      <div className="absolute inset-0 -z-10 bg-sunset-radial opacity-70" />
+      <div
+        className="absolute inset-0 -z-10 bg-sunset-radial opacity-70"
+        style={{
+          maskImage: 'linear-gradient(to bottom, black 55%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 55%, transparent 100%)',
+        }}
+      />
 
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-2 lg:gap-4 lg:px-8">
         <motion.div
@@ -18,8 +24,11 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="section-label mb-4">{PLANE_GLYPH} welcome aboard</p>
-          <h1 className="text-5xl font-bold leading-[1.05] sm:text-6xl lg:text-7xl">
+          <p className="section-label mb-4">
+            <span className="mr-1 inline-block align-[-3px] text-base">{PLANE_GLYPH}</span>
+            welcome aboard
+          </p>
+          <h1 className="text-6xl font-bold leading-[1.05] sm:text-7xl lg:text-8xl">
             <motion.span
               className="interactive relative inline-block cursor-default select-none py-2"
               whileHover="hover"
@@ -40,9 +49,10 @@ export default function Hero() {
                     variants={{
                       rest: { y: 0, color: '#ffffff' },
                       hover: {
-                        y: [0, -14, 0],
+                        y: [0, -26, 0],
+                        scale: [1, 1.12, 1],
                         color: ['#ffffff', '#f4b860', '#ffffff'],
-                        transition: { duration: 0.55, delay: i * 0.035, ease: 'easeInOut' },
+                        transition: { duration: 0.6, delay: i * 0.035, ease: 'easeInOut' },
                       },
                     }}
                   >
@@ -54,7 +64,7 @@ export default function Hero() {
               {/* Contrail the plane draws as it crosses */}
               <motion.span
                 aria-hidden="true"
-                className="absolute -bottom-1 left-0 h-[2px] w-full origin-left rounded-full bg-gradient-to-r from-sunset-gold via-sunset-amber to-sunset-burnt"
+                className="absolute -bottom-2 left-0 h-[3px] w-full origin-left rounded-full bg-gradient-to-r from-sunset-gold via-sunset-amber to-sunset-burnt"
                 variants={{
                   rest: { scaleX: 0, opacity: 0 },
                   hover: { scaleX: 1, opacity: 1, transition: { duration: 0.7, ease: 'easeOut', delay: 0.05 } },
@@ -64,7 +74,7 @@ export default function Hero() {
               {/* Plane flying across the name */}
               <motion.span
                 aria-hidden="true"
-                className="pointer-events-none absolute -top-1 left-0 text-sunset-gold"
+                className="pointer-events-none absolute -top-4 left-0 text-sunset-gold"
                 variants={{
                   rest: { x: '-10%', opacity: 0 },
                   hover: {
@@ -75,7 +85,7 @@ export default function Hero() {
                   },
                 }}
               >
-                <PlaneIcon className="text-base leading-none" />
+                <PlaneIcon className="text-2xl leading-none" />
               </motion.span>
             </motion.span>
             <span className="mt-2 block text-2xl font-medium text-neutral-400 sm:text-3xl">

@@ -11,7 +11,8 @@ export default function About() {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
       >
-        {PLANE_GLYPH} about.me
+        <span className="mr-1 inline-block align-[-3px] text-base">{PLANE_GLYPH}</span>
+        about.me
       </motion.p>
       <motion.h2
         className="mb-10 text-3xl font-bold sm:text-4xl"
