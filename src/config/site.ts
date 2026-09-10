@@ -5,22 +5,22 @@
 // ============================================================================
 
 export const profile = {
-  name: '[Your Name]',
-  callsign: 'FL390', // shown in the footer, e.g. your initials or a cruising altitude
-  role: 'Full-Stack Developer',
+  name: 'vanetia',
+  callsign: 'FL013', // shown in the footer, e.g. your initials or a cruising altitude
+  role: 'Student',
   tagline: 'I build clean, fast interfaces and the systems behind them.',
   bio: `I'm a developer who likes the golden hour better than the neon — clear code,
   considered motion, and products that feel calm to use. Currently focused on
   [your focus, e.g. web platforms / distributed systems / creative frontend].`,
-  location: '[Your City, Country]',
-  email: '[you@example.com]',
+  location: 'Singapore',
+  email: 'vangs.vanetia@gmail.com',
   resumeUrl: '', // link to a hosted PDF, or leave blank to hide the button
   avatarUrl: '', // optional headshot / illustration, leave blank for none
 }
 
 export const socials = {
-  github: '[your-github-username]',
-  linkedin: '[your-linkedin-handle]',
+  github: 'vanetiaho',
+  linkedin: 'vanetia',
   twitter: '[your-twitter-handle]',
 }
 
@@ -119,5 +119,5 @@ export const music = {
 }
 
 export const github = {
-  username: '[your-github-username]',
+  username: 'vanetiaho',
 }
