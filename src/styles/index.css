@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-neutral-800;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-base-950 text-neutral-200 font-sans;
+    background-image: radial-gradient(circle at 15% -10%, rgba(74, 37, 69, 0.35), transparent 45%),
+      radial-gradient(circle at 85% 0%, rgba(193, 80, 46, 0.18), transparent 40%);
+    background-attachment: fixed;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight;
+  }
+  ::selection {
+    @apply bg-sunset-amber/40 text-white;
+  }
+}
+
+@layer utilities {
+  .text-gradient-sunset {
+    background: linear-gradient(115deg, #f4b860, #e8934a 45%, #c1502e 80%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+  .section-label {
+    @apply font-mono text-xs uppercase tracking-[0.25em] text-sunset-amber/80;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom cursor hides native cursor only on fine-pointer, non-touch devices */
+@media (pointer: fine) {
+  html.custom-cursor-active,
+  html.custom-cursor-active * {
+    cursor: none !important;
+  }
+}
