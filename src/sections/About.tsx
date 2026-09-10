@@ -49,7 +49,7 @@ export default function About() {
           transition={{ duration: 0.5 }}
         >
           <h3 className="mb-4 font-mono text-sm uppercase tracking-wide text-sunset-amber">
-            {languages.length > 0 ? 'What I code in, per GitHub' : 'What I work with'}
+            {languages.length > 0 ? 'What I code in' : 'What I work with'}
           </h3>
           {status === 'loading' ? (
             <div className="flex h-16 items-center">

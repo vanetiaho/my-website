@@ -58,16 +58,16 @@ export const pinnedProjects: PinnedProject[] = [
     repo: 'splendor',
     title: 'Splendor',
     description:
-      'A Java implementation of the board game Splendor, with one shared rules engine powering both a console client and a web client, plus three tiers of AI opponents (easy/medium/hard) built with the Strategy pattern.',
-    tags: ['Java', 'Game AI', 'Web'],
+      'A Java implementation of the board game Splendor, with one shared rule engine powering both a console client and a web client, plus three tiers of AI opponents (easy/medium/hard) built with the Strategy pattern.',
+    tags: ['Java', 'JavaScript', 'Docker', 'Game AI'],
     github: 'https://github.com/vanetiaho/splendor',
   },
   {
     repo: 'dejaview',
     title: 'DejaView',
     description:
-      'An AI-powered Chrome extension that passively tracks fashion items you browse, then uses generative AI to recommend outfit pairings and generate virtual try-ons through a Supabase-backed serverless pipeline.',
-    tags: ['Chrome Extension', 'React', 'Supabase', 'Generative AI'],
+      'An AI-powered Chrome extension that passively tracks fashion items you browse, then uses generative AI to recommend outfit pairings and generate virtual try-ons.',
+    tags: ['JavaScript', 'Chrome Extension', 'React', 'Generative AI'],
     github: 'https://github.com/vanetiaho/dejaview',
   },
   {
@@ -75,15 +75,15 @@ export const pinnedProjects: PinnedProject[] = [
     title: 'Map N Mug',
     description:
       'A Vue + Supabase web app for finding study-friendly cafés — filter by WiFi, noise, and outlet availability, with a live map, crowd-level updates, reviews, and a gamified rewards system.',
-    tags: ['Vue', 'Supabase', 'Maps'],
+    tags: ['Vue', 'JavaScript', 'Supabase', 'Google Maps API'],
     github: 'https://github.com/vanetiaho/wad22',
   },
   {
     repo: 'loanprocessingplatform',
     title: 'Loan.ly',
     description:
-      'A team-built microservices loan processing platform (IS213, group project) demonstrating three enterprise integration patterns — orchestrated credit assessment, parallel-aggregated admin review, and event-driven repayment tracking — across 8 services behind a Kong API gateway, using REST, gRPC, and RabbitMQ.',
-    tags: ['Microservices', 'Docker', 'gRPC', 'RabbitMQ'],
+      'A microservices loan processing platform demonstrating three enterprise integration patterns — orchestrated credit assessment, parallel-aggregated admin review, and event-driven repayment tracking — across 8 services behind a Kong API gateway, using REST, gRPC, and RabbitMQ.',
+    tags: ['Python', 'JavaScript', 'Microservices', 'Docker', 'OutSystems'],
     github: 'https://github.com/vanetiaho/LoanProcessingPlatform',
   },
 ]

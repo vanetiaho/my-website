@@ -18,7 +18,7 @@ export default function ProjectsPreview() {
         <div>
           <p className="section-label mb-3">// featured.work</p>
           <h2 className="text-3xl font-bold sm:text-4xl">
-            Selected <span className="text-gradient-sunset">projects</span>
+            Pinned <span className="text-gradient-sunset">projects</span>
           </h2>
         </div>
         <Link
