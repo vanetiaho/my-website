@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { useIsTouchDevice } from '@/hooks/useIsTouchDevice'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import PlaneIcon from '@/components/icons/PlaneIcon'
+import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
 export default function Cursor() {
   const isTouch = useIsTouchDevice()
   const reduced = useReducedMotion()
   const planeRef = useRef<HTMLDivElement>(null)
+  const trailRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (isTouch) return
@@ -44,10 +45,18 @@ export default function Cursor() {
       }
 
       if (planeRef.current) {
-        const scale = hovering ? 1.5 : 1
+        const scale = hovering ? 1.4 : 1
         planeRef.current.style.transform = `translate3d(${planeX}px, ${planeY}px, 0) translate(-50%, -50%) rotate(${angle}deg) scale(${scale})`
         planeRef.current.style.color = hovering ? '#f4b860' : '#e8934a'
       }
+
+      if (trailRef.current) {
+        const length = reduced ? 0 : Math.min(speed * 2.2, 70)
+        trailRef.current.style.transform = `translate3d(${planeX}px, ${planeY}px, 0) translate(-50%, -50%) rotate(${angle + 180}deg)`
+        trailRef.current.style.width = `${length}px`
+        trailRef.current.style.opacity = String(Math.min(length / 40, 0.7))
+      }
+
       raf = requestAnimationFrame(tick)
     }
 
@@ -65,12 +74,21 @@ export default function Cursor() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[95] hidden md:block" aria-hidden="true">
+      {/* Contrail — stretches behind the plane, fades in with speed */}
+      <div
+        ref={trailRef}
+        className="fixed left-0 top-0 h-[2px] origin-left rounded-full bg-gradient-to-r from-sunset-gold to-transparent"
+        style={{ willChange: 'transform, width, opacity', width: 0, opacity: 0 }}
+      />
       <div
         ref={planeRef}
-        className="fixed left-0 top-0 transition-[color] duration-150"
-        style={{ willChange: 'transform' }}
+        className="fixed left-0 top-0 text-[30px] leading-none transition-[color] duration-150"
+        style={{
+          willChange: 'transform',
+          filter: 'drop-shadow(0 0 6px rgba(244,184,96,0.65))',
+        }}
       >
-        <PlaneIcon className="h-[22px] w-[22px]" />
+        {PLANE_GLYPH}
       </div>
     </div>
   )

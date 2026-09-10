@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { pinnedProjects } from '@/config/site'
 import { useGithubRepos } from '@/hooks/useGithubRepos'
 import { mergeWithPinned, reposToProjects } from '@/lib/github'
+import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
 export default function ProjectsPreview() {
   const { repos, status } = useGithubRepos()
@@ -16,7 +17,7 @@ export default function ProjectsPreview() {
     <section className="mx-auto max-w-6xl px-6 py-24 lg:px-8">
       <div className="mb-10 flex items-end justify-between">
         <div>
-          <p className="section-label mb-3">// featured.work</p>
+          <p className="section-label mb-3">{PLANE_GLYPH} pinned.work</p>
           <h2 className="text-3xl font-bold sm:text-4xl">
             Pinned <span className="text-gradient-sunset">projects</span>
           </h2>

@@ -17,7 +17,7 @@ export function useGithubRepos() {
 
     const controller = new AbortController()
     const timeout = window.setTimeout(() => controller.abort(), 8000)
-    fetchGithubRepos(username, controller.signal)
+    fetchGithubRepos(username, controller.signal, github.excludedRepos)
       .then((data) => {
         setRepos(data)
         setStatus('ready')

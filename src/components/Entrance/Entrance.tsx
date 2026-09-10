@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useAppStore } from '@/store/useAppStore'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { PLANE_PATH } from '@/components/icons/PlaneIcon'
+import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
 const AUTO_RESOLVE_MS = 2600
 
@@ -85,15 +85,15 @@ export default function Entrance({ onDone }: { onDone: () => void }) {
           transition={{ duration: 1.4, delay: 0.4, ease: 'easeInOut' }}
         />
 
-        {/* Plane crossing — same silhouette as the navbar mark and cursor */}
+        {/* Plane crossing — same mark as the navbar, cursor, and scroll indicator */}
         <motion.g
           initial={{ x: -60, y: 100, opacity: 0 }}
           animate={{ x: 420, y: 70, opacity: [0, 1, 1, 0] }}
           transition={{ duration: 2.2, delay: 0.6, ease: 'easeIn' }}
         >
-          <svg x={0} y={0} width={40} height={40} viewBox="0 0 24 24" fill="#f4e9dd">
-            <path d={PLANE_PATH} />
-          </svg>
+          <text x={0} y={20} fontSize={26} fill="#f4e9dd">
+            {PLANE_GLYPH}
+          </text>
         </motion.g>
       </svg>
 
@@ -103,7 +103,7 @@ export default function Entrance({ onDone }: { onDone: () => void }) {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.6 }}
       >
-        click, scroll, or wait — taking off
+        capturing the golden hour of life
       </motion.p>
     </motion.div>
   )

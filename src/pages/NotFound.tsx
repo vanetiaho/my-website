@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
+import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
 export default function NotFound() {
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
-      <p className="section-label mb-3">// error.404</p>
+      <p className="section-label mb-3">{PLANE_GLYPH} error.404</p>
       <h1 className="mb-4 text-4xl font-bold">
         Off <span className="text-gradient-sunset">course</span>
       </h1>

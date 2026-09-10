@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { profile, socials } from '@/config/site'
+import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
 const SOCIAL_LINKS = [
   { label: 'GitHub', href: `https://github.com/${socials.github}` },
@@ -37,7 +38,7 @@ export default function Contact() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <p className="section-label mb-3">// contact.init()</p>
+          <p className="section-label mb-3">{PLANE_GLYPH} contact.init()</p>
           <h1 className="mb-4 text-3xl font-bold sm:text-4xl">
             Let's build something <span className="text-gradient-sunset">great</span>
           </h1>
@@ -67,7 +68,7 @@ export default function Contact() {
         >
           {submitted ? (
             <div className="flex h-full flex-col items-center justify-center py-12 text-center">
-              <div className="mb-3 text-3xl">✈</div>
+              <div className="mb-3 text-3xl">{PLANE_GLYPH}</div>
               <h2 className="mb-1 text-xl font-semibold">Message sent!</h2>
               <p className="text-neutral-400">Your mail client should be open. Talk soon.</p>
             </div>
@@ -75,7 +76,7 @@ export default function Contact() {
             <form onSubmit={onSubmit} className="space-y-4" noValidate>
               <div>
                 <label htmlFor="name" className="mb-1 block font-mono text-xs text-neutral-400">
-                  // name
+                  {PLANE_GLYPH} name
                 </label>
                 <input
                   id="name"
@@ -89,7 +90,7 @@ export default function Contact() {
               </div>
               <div>
                 <label htmlFor="email" className="mb-1 block font-mono text-xs text-neutral-400">
-                  // email
+                  {PLANE_GLYPH} email
                 </label>
                 <input
                   id="email"
@@ -104,7 +105,7 @@ export default function Contact() {
               </div>
               <div>
                 <label htmlFor="message" className="mb-1 block font-mono text-xs text-neutral-400">
-                  // message
+                  {PLANE_GLYPH} message
                 </label>
                 <textarea
                   id="message"
@@ -125,7 +126,7 @@ export default function Contact() {
                 type="submit"
                 className="interactive w-full rounded-full bg-gradient-to-r from-sunset-gold to-sunset-amber px-6 py-3 font-mono text-sm font-medium text-base-950"
               >
-                Send message ✈
+                Send message {PLANE_GLYPH}
               </button>
             </form>
           )}
@@ -134,7 +135,7 @@ export default function Contact() {
 
       <footer className="mt-24 flex flex-col items-center gap-3 border-t border-white/10 pt-8 text-center">
         <p className="font-mono text-xs text-neutral-500">
-          {profile.name} // {profile.callsign}
+          {profile.name} {PLANE_GLYPH} {profile.callsign}
         </p>
         <p className="text-xs text-neutral-600">
           Built with React, Tailwind, and a soft spot for golden hour. &copy; {new Date().getFullYear()}

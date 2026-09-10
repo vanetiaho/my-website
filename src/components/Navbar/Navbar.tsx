@@ -34,10 +34,10 @@ export default function Navbar() {
       >
         <NavLink
           to="/"
-          className="interactive mr-1 hidden select-none items-center px-3 text-sunset-gold sm:flex"
+          className="interactive mr-1 hidden select-none items-center px-3 text-lg leading-none text-sunset-gold sm:flex"
           aria-label="Home"
         >
-          <PlaneIcon className="h-4 w-4" />
+          <PlaneIcon />
         </NavLink>
         {NAV_ITEMS.map((item) => (
           <NavLink

@@ -15,7 +15,8 @@ export type GithubRepo = {
 /** Fetches a user's public, non-fork, non-archived repos (unauthenticated GitHub API). */
 export async function fetchGithubRepos(
   username: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  excludedRepos: string[] = []
 ): Promise<GithubRepo[]> {
   const res = await fetch(
     `https://api.github.com/users/${username}/repos?sort=pushed&per_page=100`,
@@ -23,17 +24,8 @@ export async function fetchGithubRepos(
   )
   if (!res.ok) throw new Error(`GitHub API error: ${res.status}`)
   const data = (await res.json()) as GithubRepo[]
-  return data.filter((r) => !r.fork && !r.archived)
-}
-
-/** Ranks a user's primary languages by how many of their repos use them. */
-export function languagesFromRepos(repos: GithubRepo[]): string[] {
-  const counts = new Map<string, number>()
-  for (const repo of repos) {
-    if (!repo.language) continue
-    counts.set(repo.language, (counts.get(repo.language) ?? 0) + 1)
-  }
-  return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([name]) => name)
+  const excluded = new Set(excludedRepos.map((r) => r.toLowerCase()))
+  return data.filter((r) => !r.fork && !r.archived && !excluded.has(r.name.toLowerCase()))
 }
 
 function titleCase(slug: string): string {

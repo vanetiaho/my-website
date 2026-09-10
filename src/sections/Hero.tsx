@@ -2,7 +2,7 @@ import { Suspense, lazy } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { profile } from '@/config/site'
-import PlaneIcon from '@/components/icons/PlaneIcon'
+import PlaneIcon, { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
 const HeroCanvas = lazy(() => import('@/scenes/HeroCanvas'))
 const nameLetters = profile.name.split('')
@@ -10,7 +10,7 @@ const nameLetters = profile.name.split('')
 export default function Hero() {
   return (
     <section className="relative flex min-h-[100svh] items-center overflow-hidden pt-24">
-      <div className="absolute inset-0 -z-10 bg-horizon-glow" />
+      <div className="absolute inset-0 -z-10 bg-sunset-radial opacity-70" />
 
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-2 lg:gap-4 lg:px-8">
         <motion.div
@@ -18,8 +18,8 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="section-label mb-4">// welcome aboard</p>
-          <h1 className="text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
+          <p className="section-label mb-4">{PLANE_GLYPH} welcome aboard</p>
+          <h1 className="text-5xl font-bold leading-[1.05] sm:text-6xl lg:text-7xl">
             <motion.span
               className="interactive relative inline-block cursor-default select-none py-2"
               whileHover="hover"
@@ -75,7 +75,7 @@ export default function Hero() {
                   },
                 }}
               >
-                <PlaneIcon className="h-4 w-4" />
+                <PlaneIcon className="text-base leading-none" />
               </motion.span>
             </motion.span>
             <span className="mt-2 block text-2xl font-medium text-neutral-400 sm:text-3xl">
@@ -114,9 +114,6 @@ export default function Hero() {
           >
             <HeroCanvas />
           </Suspense>
-          <p className="section-label pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 text-center opacity-70">
-            drag to look around
-          </p>
         </motion.div>
       </div>
     </section>

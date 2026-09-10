@@ -1,0 +1,775 @@
+From 8fae1d99a5d7ded00e8cd6ba096a6f2aacba0302 Mon Sep 17 00:00:00 2001
+From: vanetiaho <vangs.vanetia@gmail.com>
+Date: Thu, 10 Sep 2026 17:15:35 +0000
+Subject: [PATCH] =?UTF-8?q?Home=20visuals,=20self-authored=20skills,=20cle?=
+ =?UTF-8?q?aner=20projects,=20=E2=9C=88=EF=B8=8E=20everywhere?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Hero background now matches the entrance screen's sunset-radial
+  treatment; name is bigger; removed the "drag to look around" hint.
+- About page skills are a plain hand-curated list from the actual
+  GitHub profile README (no more auto-detected/live-fetched
+  languages).
+- Projects: pinned set trimmed to Splendor, Loan.ly, and Map N Mug;
+  this portfolio's own repo and the profile-README repo are excluded
+  from the live-fetched project list.
+- GitHub contribution graph switched from a JSON fetch (fragile,
+  CORS/reliability-dependent) to a simple <img> from a well-established
+  chart service — much harder to fail, with a clearer error message
+  that doesn't imply a misconfigured username.
+- Replaced every "// label" and the custom SVG plane silhouette with
+  the ✈︎ glyph, used consistently across the navbar mark, cursor,
+  entrance flyover, scroll indicator, and section labels.
+- Custom cursor is now bigger, glows, and trails a fading contrail
+  that stretches with pointer speed.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01ADg6KJ9w2w5ZoasV1Pc5Zq
+---
+ src/components/Cursor/Cursor.tsx              |  28 ++++-
+ src/components/Entrance/Entrance.tsx          |  10 +-
+ .../FlightProgress/FlightProgress.tsx         |   8 +-
+ .../GithubCalendar/GithubCalendar.tsx         | 119 +++---------------
+ src/components/Navbar/Navbar.tsx              |   4 +-
+ src/components/icons/PlaneIcon.tsx            |  10 +-
+ src/config/site.ts                            |  33 +++--
+ src/hooks/useGithubRepos.ts                   |   2 +-
+ src/lib/github.ts                             |  16 +--
+ src/pages/Contact.tsx                         |  15 +--
+ src/pages/Music.tsx                           |   5 +-
+ src/pages/NotFound.tsx                        |   3 +-
+ src/pages/Play.tsx                            |   3 +-
+ src/pages/Projects.tsx                        |   5 +-
+ src/sections/About.tsx                        |  47 +++----
+ src/sections/Hero.tsx                         |  13 +-
+ src/sections/ProjectsPreview.tsx              |   3 +-
+ 17 files changed, 120 insertions(+), 204 deletions(-)
+
+diff --git a/src/components/Cursor/Cursor.tsx b/src/components/Cursor/Cursor.tsx
+index bcafe52..1877062 100644
+--- a/src/components/Cursor/Cursor.tsx
++++ b/src/components/Cursor/Cursor.tsx
+@@ -1,12 +1,13 @@
+ import { useEffect, useRef } from 'react'
+ import { useIsTouchDevice } from '@/hooks/useIsTouchDevice'
+ import { useReducedMotion } from '@/hooks/useReducedMotion'
+-import PlaneIcon from '@/components/icons/PlaneIcon'
++import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+ 
+ export default function Cursor() {
+   const isTouch = useIsTouchDevice()
+   const reduced = useReducedMotion()
+   const planeRef = useRef<HTMLDivElement>(null)
++  const trailRef = useRef<HTMLDivElement>(null)
+ 
+   useEffect(() => {
+     if (isTouch) return
+@@ -44,10 +45,18 @@ export default function Cursor() {
+       }
+ 
+       if (planeRef.current) {
+-        const scale = hovering ? 1.5 : 1
++        const scale = hovering ? 1.4 : 1
+         planeRef.current.style.transform = `translate3d(${planeX}px, ${planeY}px, 0) translate(-50%, -50%) rotate(${angle}deg) scale(${scale})`
+         planeRef.current.style.color = hovering ? '#f4b860' : '#e8934a'
+       }
++
++      if (trailRef.current) {
++        const length = reduced ? 0 : Math.min(speed * 2.2, 70)
++        trailRef.current.style.transform = `translate3d(${planeX}px, ${planeY}px, 0) translate(-50%, -50%) rotate(${angle + 180}deg)`
++        trailRef.current.style.width = `${length}px`
++        trailRef.current.style.opacity = String(Math.min(length / 40, 0.7))
++      }
++
+       raf = requestAnimationFrame(tick)
+     }
+ 
+@@ -65,12 +74,21 @@ export default function Cursor() {
+ 
+   return (
+     <div className="pointer-events-none fixed inset-0 z-[95] hidden md:block" aria-hidden="true">
++      {/* Contrail — stretches behind the plane, fades in with speed */}
++      <div
++        ref={trailRef}
++        className="fixed left-0 top-0 h-[2px] origin-left rounded-full bg-gradient-to-r from-sunset-gold to-transparent"
++        style={{ willChange: 'transform, width, opacity', width: 0, opacity: 0 }}
++      />
+       <div
+         ref={planeRef}
+-        className="fixed left-0 top-0 transition-[color] duration-150"
+-        style={{ willChange: 'transform' }}
++        className="fixed left-0 top-0 text-[30px] leading-none transition-[color] duration-150"
++        style={{
++          willChange: 'transform',
++          filter: 'drop-shadow(0 0 6px rgba(244,184,96,0.65))',
++        }}
+       >
+-        <PlaneIcon className="h-[22px] w-[22px]" />
++        {PLANE_GLYPH}
+       </div>
+     </div>
+   )
+diff --git a/src/components/Entrance/Entrance.tsx b/src/components/Entrance/Entrance.tsx
+index b0ed604..392d8ee 100644
+--- a/src/components/Entrance/Entrance.tsx
++++ b/src/components/Entrance/Entrance.tsx
+@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
+ import { motion } from 'framer-motion'
+ import { useAppStore } from '@/store/useAppStore'
+ import { useReducedMotion } from '@/hooks/useReducedMotion'
+-import { PLANE_PATH } from '@/components/icons/PlaneIcon'
++import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+ 
+ const AUTO_RESOLVE_MS = 2600
+ 
+@@ -85,15 +85,15 @@ export default function Entrance({ onDone }: { onDone: () => void }) {
+           transition={{ duration: 1.4, delay: 0.4, ease: 'easeInOut' }}
+         />
+ 
+-        {/* Plane crossing — same silhouette as the navbar mark and cursor */}
++        {/* Plane crossing — same mark as the navbar, cursor, and scroll indicator */}
+         <motion.g
+           initial={{ x: -60, y: 100, opacity: 0 }}
+           animate={{ x: 420, y: 70, opacity: [0, 1, 1, 0] }}
+           transition={{ duration: 2.2, delay: 0.6, ease: 'easeIn' }}
+         >
+-          <svg x={0} y={0} width={40} height={40} viewBox="0 0 24 24" fill="#f4e9dd">
+-            <path d={PLANE_PATH} />
+-          </svg>
++          <text x={0} y={20} fontSize={26} fill="#f4e9dd">
++            {PLANE_GLYPH}
++          </text>
+         </motion.g>
+       </svg>
+ 
+diff --git a/src/components/FlightProgress/FlightProgress.tsx b/src/components/FlightProgress/FlightProgress.tsx
+index beffea5..9739347 100644
+--- a/src/components/FlightProgress/FlightProgress.tsx
++++ b/src/components/FlightProgress/FlightProgress.tsx
+@@ -3,7 +3,7 @@ import gsap from 'gsap'
+ import { ScrollTrigger } from 'gsap/ScrollTrigger'
+ import { useLocation } from 'react-router-dom'
+ import { useReducedMotion } from '@/hooks/useReducedMotion'
+-import { PLANE_PATH } from '@/components/icons/PlaneIcon'
++import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+ 
+ gsap.registerPlugin(ScrollTrigger)
+ 
+@@ -48,8 +48,10 @@ export default function FlightProgress() {
+     >
+       <div className="absolute left-1/2 h-full w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-sunset-amber/30 to-transparent" />
+       <svg width="24" height="24" viewBox="0 0 24 24" className="absolute left-0 top-0">
+-        <g ref={planeRef} fill="#f4b860">
+-          <path d={PLANE_PATH} />
++        <g ref={planeRef}>
++          <text x={12} y={17} textAnchor="middle" fontSize={16} fill="#f4b860">
++            {PLANE_GLYPH}
++          </text>
+         </g>
+       </svg>
+     </div>
+diff --git a/src/components/GithubCalendar/GithubCalendar.tsx b/src/components/GithubCalendar/GithubCalendar.tsx
+index 610812b..53399e8 100644
+--- a/src/components/GithubCalendar/GithubCalendar.tsx
++++ b/src/components/GithubCalendar/GithubCalendar.tsx
+@@ -1,69 +1,11 @@
+-import { useEffect, useState } from 'react'
+-import { motion } from 'framer-motion'
++import { useState } from 'react'
+ import { github } from '@/config/site'
+ 
+-type Day = { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 }
+-
+-const LEVEL_COLORS = [
+-  'bg-white/5',
+-  'bg-sunset-plum/60',
+-  'bg-sunset-burnt/70',
+-  'bg-sunset-amber',
+-  'bg-sunset-gold',
+-]
+-
+-function groupByWeek(days: Day[]): Day[][] {
+-  const weeks: Day[][] = []
+-  let current: Day[] = []
+-  days.forEach((day, i) => {
+-    const weekday = new Date(day.date).getUTCDay()
+-    if (i === 0) {
+-      for (let pad = 0; pad < weekday; pad++) {
+-        current.push({ date: '', count: 0, level: 0 })
+-      }
+-    }
+-    current.push(day)
+-    if (weekday === 6) {
+-      weeks.push(current)
+-      current = []
+-    }
+-  })
+-  if (current.length) weeks.push(current)
+-  return weeks
+-}
++type Status = 'loading' | 'ready' | 'error' | 'unset'
+ 
+ export default function GithubCalendar() {
+-  const [days, setDays] = useState<Day[] | null>(null)
+-  const [status, setStatus] = useState<'loading' | 'ready' | 'error' | 'unset'>('loading')
+-
+-  useEffect(() => {
+-    const username = github.username
+-    if (!username || username.startsWith('[')) {
+-      setStatus('unset')
+-      return
+-    }
+-
+-    const controller = new AbortController()
+-    const timeout = window.setTimeout(() => controller.abort(), 8000)
+-    fetch(`https://github-contributions-api.jogruber.de/rest/v1/${username}?y=last`, {
+-      signal: controller.signal,
+-    })
+-      .then((res) => {
+-        if (!res.ok) throw new Error('bad response')
+-        return res.json()
+-      })
+-      .then((data) => {
+-        setDays(data.contributions as Day[])
+-        setStatus('ready')
+-      })
+-      .catch(() => setStatus('error'))
+-      .finally(() => window.clearTimeout(timeout))
+-
+-    return () => {
+-      window.clearTimeout(timeout)
+-      controller.abort()
+-    }
+-  }, [])
++  const usernameSet = Boolean(github.username) && !github.username.startsWith('[')
++  const [status, setStatus] = useState<Status>(usernameSet ? 'loading' : 'unset')
+ 
+   if (status === 'unset') {
+     return (
+@@ -80,53 +22,26 @@ export default function GithubCalendar() {
+   if (status === 'error') {
+     return (
+       <div className="glass-panel rounded-2xl p-6 text-sm text-neutral-500">
+-        Couldn't load the GitHub contribution graph right now — check the username in the
+-        config, or try again shortly.
+-      </div>
+-    )
+-  }
+-
+-  if (status === 'loading' || !days) {
+-    return (
+-      <div className="glass-panel flex h-40 items-center justify-center rounded-2xl">
+-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-sunset-amber/30 border-t-sunset-amber" />
++        Couldn't load the GitHub contribution graph right now — it may just be a slow
++        connection. Refresh to try again.
+       </div>
+     )
+   }
+ 
+-  const weeks = groupByWeek(days)
+-  const total = days.reduce((sum, d) => sum + d.count, 0)
+-
+   return (
+     <div className="glass-panel overflow-x-auto rounded-2xl p-6">
+-      <div className="mb-4 flex items-center justify-between">
+-        <p className="font-mono text-sm text-neutral-400">
+-          {total.toLocaleString()} contributions in the last year
+-        </p>
+-        <div className="flex items-center gap-1 text-[10px] text-neutral-500">
+-          <span>less</span>
+-          {LEVEL_COLORS.map((c, i) => (
+-            <span key={i} className={`h-2.5 w-2.5 rounded-sm ${c}`} />
+-          ))}
+-          <span>more</span>
++      {status === 'loading' && (
++        <div className="flex h-40 items-center justify-center">
++          <div className="h-6 w-6 animate-spin rounded-full border-2 border-sunset-amber/30 border-t-sunset-amber" />
+         </div>
+-      </div>
+-      <div className="flex gap-1">
+-        {weeks.map((week, wi) => (
+-          <div key={wi} className="flex flex-col gap-1">
+-            {week.map((day, di) => (
+-              <motion.div
+-                key={di}
+-                title={day.date ? `${day.count} contributions on ${day.date}` : undefined}
+-                className={`h-2.5 w-2.5 rounded-sm ${day.date ? LEVEL_COLORS[day.level] : 'bg-transparent'}`}
+-                initial={{ opacity: 0 }}
+-                animate={{ opacity: 1 }}
+-                transition={{ duration: 0.3, delay: (wi * 7 + di) * 0.001 }}
+-              />
+-            ))}
+-          </div>
+-        ))}
+-      </div>
++      )}
++      <img
++        src={`https://ghchart.rshah.org/e8934a/${github.username}`}
++        alt={`${github.username}'s GitHub contribution graph`}
++        className={status === 'ready' ? 'w-full min-w-[640px]' : 'hidden'}
++        onLoad={() => setStatus('ready')}
++        onError={() => setStatus('error')}
++      />
+     </div>
+   )
+ }
+diff --git a/src/components/Navbar/Navbar.tsx b/src/components/Navbar/Navbar.tsx
+index bdc9bc1..0e33823 100644
+--- a/src/components/Navbar/Navbar.tsx
++++ b/src/components/Navbar/Navbar.tsx
+@@ -34,10 +34,10 @@ export default function Navbar() {
+       >
+         <NavLink
+           to="/"
+-          className="interactive mr-1 hidden select-none items-center px-3 text-sunset-gold sm:flex"
++          className="interactive mr-1 hidden select-none items-center px-3 text-lg leading-none text-sunset-gold sm:flex"
+           aria-label="Home"
+         >
+-          <PlaneIcon className="h-4 w-4" />
++          <PlaneIcon />
+         </NavLink>
+         {NAV_ITEMS.map((item) => (
+           <NavLink
+diff --git a/src/components/icons/PlaneIcon.tsx b/src/components/icons/PlaneIcon.tsx
+index f8e2f5d..c9317e1 100644
+--- a/src/components/icons/PlaneIcon.tsx
++++ b/src/components/icons/PlaneIcon.tsx
+@@ -1,10 +1,10 @@
+-/** The one plane silhouette used everywhere: navbar mark, cursor, entrance flyover, scroll indicator. */
+-export const PLANE_PATH = 'M2 12l7-1 3-4 1 .3-2 4.7 6 .5-1 1.3-6 .2-2 3.5-1-.2.7-3z'
++/** The one plane mark used everywhere: navbar, cursor, entrance flyover, scroll indicator, section labels. */
++export const PLANE_GLYPH = '✈︎'
+ 
+ export default function PlaneIcon({ className }: { className?: string }) {
+   return (
+-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+-      <path d={PLANE_PATH} />
+-    </svg>
++    <span className={className} aria-hidden="true">
++      {PLANE_GLYPH}
++    </span>
+   )
+ }
+diff --git a/src/config/site.ts b/src/config/site.ts
+index f75f5ea..97e2761 100644
+--- a/src/config/site.ts
++++ b/src/config/site.ts
+@@ -22,18 +22,19 @@ export const socials = {
+   linkedin: 'vanetia',
+ }
+ 
+-// Used only as a fallback if the live GitHub language fetch (below) fails or
+-// github.username isn't set — otherwise the About page shows real languages
+-// pulled straight from your public repos.
+-export const fallbackSkills = [
+-  'TypeScript',
+-  'JavaScript',
++// The languages/tools shown on the About page — edit this list directly,
++// it's yours to curate.
++export const skills = [
+   'Python',
+-  'React',
+-  'Tailwind CSS',
+-  'Node.js',
+-  'PostgreSQL',
++  'Java',
++  'JavaScript',
++  'PHP',
++  'Vue.js',
++  'MySQL',
++  'Supabase',
++  'AWS',
+   'Docker',
++  'Figma',
+ ]
+ 
+ export type PinnedProject = {
+@@ -62,14 +63,6 @@ export const pinnedProjects: PinnedProject[] = [
+     tags: ['Java', 'JavaScript', 'Docker', 'Game AI'],
+     github: 'https://github.com/vanetiaho/splendor',
+   },
+-  {
+-    repo: 'dejaview',
+-    title: 'DejaView',
+-    description:
+-      'An AI-powered Chrome extension that passively tracks fashion items you browse, then uses generative AI to recommend outfit pairings and generate virtual try-ons.',
+-    tags: ['JavaScript', 'Chrome Extension', 'React', 'Generative AI'],
+-    github: 'https://github.com/vanetiaho/dejaview',
+-  },
+   {
+     repo: 'wad22',
+     title: 'Map N Mug',
+@@ -104,4 +97,8 @@ export const music = {
+ 
+ export const github = {
+   username: 'vanetiaho',
++  // Repo names (case-insensitive) to leave out of the live-fetched project
++  // list — this portfolio's own repo and your profile-README repo aren't
++  // projects.
++  excludedRepos: ['my-website', 'vanetiaho'],
+ }
+diff --git a/src/hooks/useGithubRepos.ts b/src/hooks/useGithubRepos.ts
+index 5c24f37..5eaa640 100644
+--- a/src/hooks/useGithubRepos.ts
++++ b/src/hooks/useGithubRepos.ts
+@@ -17,7 +17,7 @@ export function useGithubRepos() {
+ 
+     const controller = new AbortController()
+     const timeout = window.setTimeout(() => controller.abort(), 8000)
+-    fetchGithubRepos(username, controller.signal)
++    fetchGithubRepos(username, controller.signal, github.excludedRepos)
+       .then((data) => {
+         setRepos(data)
+         setStatus('ready')
+diff --git a/src/lib/github.ts b/src/lib/github.ts
+index d4276c6..db78df3 100644
+--- a/src/lib/github.ts
++++ b/src/lib/github.ts
+@@ -15,7 +15,8 @@ export type GithubRepo = {
+ /** Fetches a user's public, non-fork, non-archived repos (unauthenticated GitHub API). */
+ export async function fetchGithubRepos(
+   username: string,
+-  signal?: AbortSignal
++  signal?: AbortSignal,
++  excludedRepos: string[] = []
+ ): Promise<GithubRepo[]> {
+   const res = await fetch(
+     `https://api.github.com/users/${username}/repos?sort=pushed&per_page=100`,
+@@ -23,17 +24,8 @@ export async function fetchGithubRepos(
+   )
+   if (!res.ok) throw new Error(`GitHub API error: ${res.status}`)
+   const data = (await res.json()) as GithubRepo[]
+-  return data.filter((r) => !r.fork && !r.archived)
+-}
+-
+-/** Ranks a user's primary languages by how many of their repos use them. */
+-export function languagesFromRepos(repos: GithubRepo[]): string[] {
+-  const counts = new Map<string, number>()
+-  for (const repo of repos) {
+-    if (!repo.language) continue
+-    counts.set(repo.language, (counts.get(repo.language) ?? 0) + 1)
+-  }
+-  return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([name]) => name)
++  const excluded = new Set(excludedRepos.map((r) => r.toLowerCase()))
++  return data.filter((r) => !r.fork && !r.archived && !excluded.has(r.name.toLowerCase()))
+ }
+ 
+ function titleCase(slug: string): string {
+diff --git a/src/pages/Contact.tsx b/src/pages/Contact.tsx
+index 49c30d7..e504aed 100644
+--- a/src/pages/Contact.tsx
++++ b/src/pages/Contact.tsx
+@@ -1,6 +1,7 @@
+ import { useState } from 'react'
+ import { motion } from 'framer-motion'
+ import { profile, socials } from '@/config/site'
++import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+ 
+ const SOCIAL_LINKS = [
+   { label: 'GitHub', href: `https://github.com/${socials.github}` },
+@@ -37,7 +38,7 @@ export default function Contact() {
+           animate={{ opacity: 1, x: 0 }}
+           transition={{ duration: 0.5 }}
+         >
+-          <p className="section-label mb-3">// contact.init()</p>
++          <p className="section-label mb-3">{PLANE_GLYPH} contact.init()</p>
+           <h1 className="mb-4 text-3xl font-bold sm:text-4xl">
+             Let's build something <span className="text-gradient-sunset">great</span>
+           </h1>
+@@ -67,7 +68,7 @@ export default function Contact() {
+         >
+           {submitted ? (
+             <div className="flex h-full flex-col items-center justify-center py-12 text-center">
+-              <div className="mb-3 text-3xl">✈</div>
++              <div className="mb-3 text-3xl">{PLANE_GLYPH}</div>
+               <h2 className="mb-1 text-xl font-semibold">Message sent!</h2>
+               <p className="text-neutral-400">Your mail client should be open. Talk soon.</p>
+             </div>
+@@ -75,7 +76,7 @@ export default function Contact() {
+             <form onSubmit={onSubmit} className="space-y-4" noValidate>
+               <div>
+                 <label htmlFor="name" className="mb-1 block font-mono text-xs text-neutral-400">
+-                  // name
++                  {PLANE_GLYPH} name
+                 </label>
+                 <input
+                   id="name"
+@@ -89,7 +90,7 @@ export default function Contact() {
+               </div>
+               <div>
+                 <label htmlFor="email" className="mb-1 block font-mono text-xs text-neutral-400">
+-                  // email
++                  {PLANE_GLYPH} email
+                 </label>
+                 <input
+                   id="email"
+@@ -104,7 +105,7 @@ export default function Contact() {
+               </div>
+               <div>
+                 <label htmlFor="message" className="mb-1 block font-mono text-xs text-neutral-400">
+-                  // message
++                  {PLANE_GLYPH} message
+                 </label>
+                 <textarea
+                   id="message"
+@@ -125,7 +126,7 @@ export default function Contact() {
+                 type="submit"
+                 className="interactive w-full rounded-full bg-gradient-to-r from-sunset-gold to-sunset-amber px-6 py-3 font-mono text-sm font-medium text-base-950"
+               >
+-                Send message ✈
++                Send message {PLANE_GLYPH}
+               </button>
+             </form>
+           )}
+@@ -134,7 +135,7 @@ export default function Contact() {
+ 
+       <footer className="mt-24 flex flex-col items-center gap-3 border-t border-white/10 pt-8 text-center">
+         <p className="font-mono text-xs text-neutral-500">
+-          {profile.name} // {profile.callsign}
++          {profile.name} {PLANE_GLYPH} {profile.callsign}
+         </p>
+         <p className="text-xs text-neutral-600">
+           Built with React, Tailwind, and a soft spot for golden hour. &copy; {new Date().getFullYear()}
+diff --git a/src/pages/Music.tsx b/src/pages/Music.tsx
+index 86f96a4..febfaaf 100644
+--- a/src/pages/Music.tsx
++++ b/src/pages/Music.tsx
+@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
+ import { music } from '@/config/site'
+ import Vinyl from '@/components/Vinyl/Vinyl'
+ import { toSpotifyEmbedUrl } from '@/lib/spotify'
++import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+ 
+ export default function Music() {
+   const [spinning, setSpinning] = useState(false)
+@@ -10,7 +11,7 @@ export default function Music() {
+ 
+   return (
+     <div className="mx-auto max-w-6xl px-6 pb-24 pt-32 lg:px-8">
+-      <p className="section-label mb-3">// now.playing</p>
++      <p className="section-label mb-3">{PLANE_GLYPH} now.playing</p>
+       <h1 className="mb-10 text-3xl font-bold sm:text-4xl">
+         Sounds from the <span className="text-gradient-sunset">cockpit</span>
+       </h1>
+@@ -55,7 +56,7 @@ export default function Music() {
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.5, delay: 0.1 }}
+         >
+-          <h2 className="section-label mb-4">// favorites</h2>
++          <h2 className="section-label mb-4">{PLANE_GLYPH} favorites</h2>
+           <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 lg:mx-0 lg:grid lg:grid-cols-1 lg:gap-3 lg:overflow-visible lg:px-0">
+             {music.favorites.map((track, i) => (
+               <a
+diff --git a/src/pages/NotFound.tsx b/src/pages/NotFound.tsx
+index 699f52e..bca3491 100644
+--- a/src/pages/NotFound.tsx
++++ b/src/pages/NotFound.tsx
+@@ -1,9 +1,10 @@
+ import { Link } from 'react-router-dom'
++import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+ 
+ export default function NotFound() {
+   return (
+     <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
+-      <p className="section-label mb-3">// error.404</p>
++      <p className="section-label mb-3">{PLANE_GLYPH} error.404</p>
+       <h1 className="mb-4 text-4xl font-bold">
+         Off <span className="text-gradient-sunset">course</span>
+       </h1>
+diff --git a/src/pages/Play.tsx b/src/pages/Play.tsx
+index acbdfd5..7d1028e 100644
+--- a/src/pages/Play.tsx
++++ b/src/pages/Play.tsx
+@@ -1,11 +1,12 @@
+ import { Suspense, lazy } from 'react'
++import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+ 
+ const PlaneGame = lazy(() => import('@/game/PlaneGame'))
+ 
+ export default function Play() {
+   return (
+     <div className="mx-auto max-w-4xl px-6 pb-24 pt-32 text-center lg:px-8">
+-      <p className="section-label mb-3">// easter.egg</p>
++      <p className="section-label mb-3">{PLANE_GLYPH} easter.egg</p>
+       <h1 className="mb-3 text-3xl font-bold sm:text-4xl">
+         Keep the plane <span className="text-gradient-sunset">flying</span>
+       </h1>
+diff --git a/src/pages/Projects.tsx b/src/pages/Projects.tsx
+index 3505455..f76c9d7 100644
+--- a/src/pages/Projects.tsx
++++ b/src/pages/Projects.tsx
+@@ -4,6 +4,7 @@ import { pinnedProjects } from '@/config/site'
+ import { useGithubRepos } from '@/hooks/useGithubRepos'
+ import { mergeWithPinned, reposToProjects } from '@/lib/github'
+ import GithubCalendar from '@/components/GithubCalendar/GithubCalendar'
++import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+ 
+ export default function Projects() {
+   const { repos, status } = useGithubRepos()
+@@ -24,13 +25,13 @@ export default function Projects() {
+ 
+   return (
+     <div className="mx-auto max-w-6xl px-6 pb-24 pt-32 lg:px-8">
+-      <p className="section-label mb-3">// projects.list()</p>
++      <p className="section-label mb-3">{PLANE_GLYPH} projects.list()</p>
+       <h1 className="mb-10 text-3xl font-bold sm:text-4xl">
+         Things I've <span className="text-gradient-sunset">built</span>
+       </h1>
+ 
+       <div className="mb-10">
+-        <p className="section-label mb-3">// github.activity</p>
++        <p className="section-label mb-3">{PLANE_GLYPH} github.activity</p>
+         <GithubCalendar />
+       </div>
+ 
+diff --git a/src/sections/About.tsx b/src/sections/About.tsx
+index faa373f..d02d010 100644
+--- a/src/sections/About.tsx
++++ b/src/sections/About.tsx
+@@ -1,13 +1,8 @@
+ import { motion } from 'framer-motion'
+-import { profile, fallbackSkills } from '@/config/site'
+-import { useGithubRepos } from '@/hooks/useGithubRepos'
+-import { languagesFromRepos } from '@/lib/github'
++import { profile, skills } from '@/config/site'
++import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+ 
+ export default function About() {
+-  const { repos, status } = useGithubRepos()
+-  const languages = status === 'ready' ? languagesFromRepos(repos) : []
+-  const skills = languages.length > 0 ? languages : fallbackSkills
+-
+   return (
+     <section id="about" className="mx-auto max-w-6xl px-6 py-24 lg:px-8">
+       <motion.p
+@@ -16,7 +11,7 @@ export default function About() {
+         whileInView={{ opacity: 1 }}
+         viewport={{ once: true }}
+       >
+-        // about.me
++        {PLANE_GLYPH} about.me
+       </motion.p>
+       <motion.h2
+         className="mb-10 text-3xl font-bold sm:text-4xl"
+@@ -49,28 +44,22 @@ export default function About() {
+           transition={{ duration: 0.5 }}
+         >
+           <h3 className="mb-4 font-mono text-sm uppercase tracking-wide text-sunset-amber">
+-            {languages.length > 0 ? 'What I code in' : 'What I work with'}
++            What I work with
+           </h3>
+-          {status === 'loading' ? (
+-            <div className="flex h-16 items-center">
+-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-sunset-amber/30 border-t-sunset-amber" />
+-            </div>
+-          ) : (
+-            <div className="flex flex-wrap gap-2">
+-              {skills.map((skill, i) => (
+-                <motion.span
+-                  key={skill}
+-                  className="rounded-full bg-white/5 px-3.5 py-1.5 text-sm text-neutral-200"
+-                  initial={{ opacity: 0, y: 8 }}
+-                  whileInView={{ opacity: 1, y: 0 }}
+-                  viewport={{ once: true }}
+-                  transition={{ duration: 0.3, delay: i * 0.04 }}
+-                >
+-                  {skill}
+-                </motion.span>
+-              ))}
+-            </div>
+-          )}
++          <div className="flex flex-wrap gap-2">
++            {skills.map((skill, i) => (
++              <motion.span
++                key={skill}
++                className="rounded-full bg-white/5 px-3.5 py-1.5 text-sm text-neutral-200"
++                initial={{ opacity: 0, y: 8 }}
++                whileInView={{ opacity: 1, y: 0 }}
++                viewport={{ once: true }}
++                transition={{ duration: 0.3, delay: i * 0.04 }}
++              >
++                {skill}
++              </motion.span>
++            ))}
++          </div>
+         </motion.div>
+       </div>
+     </section>
+diff --git a/src/sections/Hero.tsx b/src/sections/Hero.tsx
+index 793c066..e1436f6 100644
+--- a/src/sections/Hero.tsx
++++ b/src/sections/Hero.tsx
+@@ -2,7 +2,7 @@ import { Suspense, lazy } from 'react'
+ import { motion } from 'framer-motion'
+ import { Link } from 'react-router-dom'
+ import { profile } from '@/config/site'
+-import PlaneIcon from '@/components/icons/PlaneIcon'
++import PlaneIcon, { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+ 
+ const HeroCanvas = lazy(() => import('@/scenes/HeroCanvas'))
+ const nameLetters = profile.name.split('')
+@@ -10,7 +10,7 @@ const nameLetters = profile.name.split('')
+ export default function Hero() {
+   return (
+     <section className="relative flex min-h-[100svh] items-center overflow-hidden pt-24">
+-      <div className="absolute inset-0 -z-10 bg-horizon-glow" />
++      <div className="absolute inset-0 -z-10 bg-sunset-radial opacity-70" />
+ 
+       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-2 lg:gap-4 lg:px-8">
+         <motion.div
+@@ -18,8 +18,8 @@ export default function Hero() {
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+         >
+-          <p className="section-label mb-4">// welcome aboard</p>
+-          <h1 className="text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
++          <p className="section-label mb-4">{PLANE_GLYPH} welcome aboard</p>
++          <h1 className="text-5xl font-bold leading-[1.05] sm:text-6xl lg:text-7xl">
+             <motion.span
+               className="interactive relative inline-block cursor-default select-none py-2"
+               whileHover="hover"
+@@ -75,7 +75,7 @@ export default function Hero() {
+                   },
+                 }}
+               >
+-                <PlaneIcon className="h-4 w-4" />
++                <PlaneIcon className="text-base leading-none" />
+               </motion.span>
+             </motion.span>
+             <span className="mt-2 block text-2xl font-medium text-neutral-400 sm:text-3xl">
+@@ -114,9 +114,6 @@ export default function Hero() {
+           >
+             <HeroCanvas />
+           </Suspense>
+-          <p className="section-label pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 text-center opacity-70">
+-            drag to look around
+-          </p>
+         </motion.div>
+       </div>
+     </section>
+diff --git a/src/sections/ProjectsPreview.tsx b/src/sections/ProjectsPreview.tsx
+index b0a5e5f..625d20a 100644
+--- a/src/sections/ProjectsPreview.tsx
++++ b/src/sections/ProjectsPreview.tsx
+@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
+ import { pinnedProjects } from '@/config/site'
+ import { useGithubRepos } from '@/hooks/useGithubRepos'
+ import { mergeWithPinned, reposToProjects } from '@/lib/github'
++import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+ 
+ export default function ProjectsPreview() {
+   const { repos, status } = useGithubRepos()
+@@ -16,7 +17,7 @@ export default function ProjectsPreview() {
+     <section className="mx-auto max-w-6xl px-6 py-24 lg:px-8">
+       <div className="mb-10 flex items-end justify-between">
+         <div>
+-          <p className="section-label mb-3">// featured.work</p>
++          <p className="section-label mb-3">{PLANE_GLYPH} pinned.work</p>
+           <h2 className="text-3xl font-bold sm:text-4xl">
+             Pinned <span className="text-gradient-sunset">projects</span>
+           </h2>
+-- 
+2.43.0
+

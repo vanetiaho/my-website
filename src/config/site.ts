@@ -22,18 +22,19 @@ export const socials = {
   linkedin: 'vanetia',
 }
 
-// Used only as a fallback if the live GitHub language fetch (below) fails or
-// github.username isn't set — otherwise the About page shows real languages
-// pulled straight from your public repos.
-export const fallbackSkills = [
-  'TypeScript',
-  'JavaScript',
+// The languages/tools shown on the About page — edit this list directly,
+// it's yours to curate.
+export const skills = [
   'Python',
-  'React',
-  'Tailwind CSS',
-  'Node.js',
-  'PostgreSQL',
+  'Java',
+  'JavaScript',
+  'PHP',
+  'Vue.js',
+  'MySQL',
+  'Supabase',
+  'AWS',
   'Docker',
+  'Figma',
 ]
 
 export type PinnedProject = {
@@ -61,14 +62,6 @@ export const pinnedProjects: PinnedProject[] = [
       'A Java implementation of the board game Splendor, with one shared rule engine powering both a console client and a web client, plus three tiers of AI opponents (easy/medium/hard) built with the Strategy pattern.',
     tags: ['Java', 'JavaScript', 'Docker', 'Game AI'],
     github: 'https://github.com/vanetiaho/splendor',
-  },
-  {
-    repo: 'dejaview',
-    title: 'DejaView',
-    description:
-      'An AI-powered Chrome extension that passively tracks fashion items you browse, then uses generative AI to recommend outfit pairings and generate virtual try-ons.',
-    tags: ['JavaScript', 'Chrome Extension', 'React', 'Generative AI'],
-    github: 'https://github.com/vanetiaho/dejaview',
   },
   {
     repo: 'wad22',
@@ -104,4 +97,8 @@ export const music = {
 
 export const github = {
   username: 'vanetiaho',
+  // Repo names (case-insensitive) to leave out of the live-fetched project
+  // list — this portfolio's own repo and your profile-README repo aren't
+  // projects.
+  excludedRepos: ['my-website', 'vanetiaho'],
 }

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { music } from '@/config/site'
 import Vinyl from '@/components/Vinyl/Vinyl'
 import { toSpotifyEmbedUrl } from '@/lib/spotify'
+import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
 export default function Music() {
   const [spinning, setSpinning] = useState(false)
@@ -10,7 +11,7 @@ export default function Music() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-32 lg:px-8">
-      <p className="section-label mb-3">// now.playing</p>
+      <p className="section-label mb-3">{PLANE_GLYPH} now.playing</p>
       <h1 className="mb-10 text-3xl font-bold sm:text-4xl">
         Sounds from the <span className="text-gradient-sunset">cockpit</span>
       </h1>
@@ -55,7 +56,7 @@ export default function Music() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <h2 className="section-label mb-4">// favorites</h2>
+          <h2 className="section-label mb-4">{PLANE_GLYPH} favorites</h2>
           <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 lg:mx-0 lg:grid lg:grid-cols-1 lg:gap-3 lg:overflow-visible lg:px-0">
             {music.favorites.map((track, i) => (
               <a

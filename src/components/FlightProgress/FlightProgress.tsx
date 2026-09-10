@@ -3,7 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useLocation } from 'react-router-dom'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { PLANE_PATH } from '@/components/icons/PlaneIcon'
+import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -48,8 +48,10 @@ export default function FlightProgress() {
     >
       <div className="absolute left-1/2 h-full w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-sunset-amber/30 to-transparent" />
       <svg width="24" height="24" viewBox="0 0 24 24" className="absolute left-0 top-0">
-        <g ref={planeRef} fill="#f4b860">
-          <path d={PLANE_PATH} />
+        <g ref={planeRef}>
+          <text x={12} y={17} textAnchor="middle" fontSize={16} fill="#f4b860">
+            {PLANE_GLYPH}
+          </text>
         </g>
       </svg>
     </div>

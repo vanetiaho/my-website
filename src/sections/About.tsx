@@ -1,13 +1,8 @@
 import { motion } from 'framer-motion'
-import { profile, fallbackSkills } from '@/config/site'
-import { useGithubRepos } from '@/hooks/useGithubRepos'
-import { languagesFromRepos } from '@/lib/github'
+import { profile, skills } from '@/config/site'
+import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
 export default function About() {
-  const { repos, status } = useGithubRepos()
-  const languages = status === 'ready' ? languagesFromRepos(repos) : []
-  const skills = languages.length > 0 ? languages : fallbackSkills
-
   return (
     <section id="about" className="mx-auto max-w-6xl px-6 py-24 lg:px-8">
       <motion.p
@@ -16,7 +11,7 @@ export default function About() {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
       >
-        // about.me
+        {PLANE_GLYPH} about.me
       </motion.p>
       <motion.h2
         className="mb-10 text-3xl font-bold sm:text-4xl"
@@ -49,28 +44,22 @@ export default function About() {
           transition={{ duration: 0.5 }}
         >
           <h3 className="mb-4 font-mono text-sm uppercase tracking-wide text-sunset-amber">
-            {languages.length > 0 ? 'What I code in' : 'What I work with'}
+            What I work with
           </h3>
-          {status === 'loading' ? (
-            <div className="flex h-16 items-center">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-sunset-amber/30 border-t-sunset-amber" />
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {skills.map((skill, i) => (
-                <motion.span
-                  key={skill}
-                  className="rounded-full bg-white/5 px-3.5 py-1.5 text-sm text-neutral-200"
-                  initial={{ opacity: 0, y: 8 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.3, delay: i * 0.04 }}
-                >
-                  {skill}
-                </motion.span>
-              ))}
-            </div>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {skills.map((skill, i) => (
+              <motion.span
+                key={skill}
+                className="rounded-full bg-white/5 px-3.5 py-1.5 text-sm text-neutral-200"
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: i * 0.04 }}
+              >
+                {skill}
+              </motion.span>
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>

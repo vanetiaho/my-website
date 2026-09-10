@@ -4,6 +4,7 @@ import { pinnedProjects } from '@/config/site'
 import { useGithubRepos } from '@/hooks/useGithubRepos'
 import { mergeWithPinned, reposToProjects } from '@/lib/github'
 import GithubCalendar from '@/components/GithubCalendar/GithubCalendar'
+import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
 export default function Projects() {
   const { repos, status } = useGithubRepos()
@@ -24,13 +25,13 @@ export default function Projects() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-32 lg:px-8">
-      <p className="section-label mb-3">// projects.list()</p>
+      <p className="section-label mb-3">{PLANE_GLYPH} projects.list()</p>
       <h1 className="mb-10 text-3xl font-bold sm:text-4xl">
         Things I've <span className="text-gradient-sunset">built</span>
       </h1>
 
       <div className="mb-10">
-        <p className="section-label mb-3">// github.activity</p>
+        <p className="section-label mb-3">{PLANE_GLYPH} github.activity</p>
         <GithubCalendar />
       </div>
 
