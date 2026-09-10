@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { projects as fallbackProjects } from '@/config/site'
+import { pinnedProjects } from '@/config/site'
 import { useGithubRepos } from '@/hooks/useGithubRepos'
-import { reposToProjects } from '@/lib/github'
+import { mergeWithPinned, reposToProjects } from '@/lib/github'
 import GithubCalendar from '@/components/GithubCalendar/GithubCalendar'
 
 export default function Projects() {
@@ -10,8 +10,10 @@ export default function Projects() {
   const [filter, setFilter] = useState<string | null>(null)
 
   const projects = useMemo(() => {
-    if (status === 'ready' && repos.length > 0) return reposToProjects(repos)
-    return fallbackProjects
+    if (status === 'ready' && repos.length > 0) {
+      return mergeWithPinned(reposToProjects(repos), pinnedProjects)
+    }
+    return pinnedProjects.map((p) => ({ id: p.repo, ...p }))
   }, [status, repos])
 
   const allTags = useMemo(
@@ -86,28 +88,16 @@ export default function Projects() {
                     </span>
                   ))}
                 </div>
-                <div className="flex gap-4 font-mono text-xs text-neutral-400">
-                  {project.github && (
-                    <a
-                      href={project.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="interactive hover:text-sunset-gold"
-                    >
-                      Source ↗
-                    </a>
-                  )}
-                  {project.live && (
-                    <a
-                      href={project.live}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="interactive hover:text-sunset-gold"
-                    >
-                      Live ↗
-                    </a>
-                  )}
-                </div>
+                {project.github && (
+                  <a
+                    href={project.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="interactive font-mono text-xs text-neutral-400 hover:text-sunset-gold"
+                  >
+                    Source ↗
+                  </a>
+                )}
               </motion.div>
             ))}
           </div>

@@ -2,8 +2,10 @@ import { Suspense, lazy } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { profile } from '@/config/site'
+import PlaneIcon from '@/components/icons/PlaneIcon'
 
 const HeroCanvas = lazy(() => import('@/scenes/HeroCanvas'))
+const nameLetters = profile.name.split('')
 
 export default function Hero() {
   return (
@@ -19,23 +21,62 @@ export default function Hero() {
           <p className="section-label mb-4">// welcome aboard</p>
           <h1 className="text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
             <motion.span
-              className="interactive relative inline-block cursor-default"
+              className="interactive relative inline-block cursor-default select-none py-2"
               whileHover="hover"
               initial="rest"
             >
               <motion.span
-                className="relative inline-block"
-                variants={{ rest: { y: 0 }, hover: { y: -2 } }}
-                transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                className="relative inline-flex"
+                variants={{
+                  rest: { filter: 'drop-shadow(0 0 0px rgba(244,184,96,0))' },
+                  hover: { filter: 'drop-shadow(0 0 18px rgba(244,184,96,0.55))' },
+                }}
+                transition={{ duration: 0.4 }}
               >
-                {profile.name}
+                {nameLetters.map((ch, i) => (
+                  <motion.span
+                    key={i}
+                    className="inline-block"
+                    variants={{
+                      rest: { y: 0, color: '#ffffff' },
+                      hover: {
+                        y: [0, -14, 0],
+                        color: ['#ffffff', '#f4b860', '#ffffff'],
+                        transition: { duration: 0.55, delay: i * 0.035, ease: 'easeInOut' },
+                      },
+                    }}
+                  >
+                    {ch === ' ' ? ' ' : ch}
+                  </motion.span>
+                ))}
               </motion.span>
+
+              {/* Contrail the plane draws as it crosses */}
               <motion.span
                 aria-hidden="true"
-                className="absolute -bottom-1 left-0 h-[3px] w-full origin-left rounded-full bg-gradient-to-r from-sunset-gold via-sunset-amber to-sunset-burnt"
-                variants={{ rest: { scaleX: 0, opacity: 0 }, hover: { scaleX: 1, opacity: 1 } }}
-                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className="absolute -bottom-1 left-0 h-[2px] w-full origin-left rounded-full bg-gradient-to-r from-sunset-gold via-sunset-amber to-sunset-burnt"
+                variants={{
+                  rest: { scaleX: 0, opacity: 0 },
+                  hover: { scaleX: 1, opacity: 1, transition: { duration: 0.7, ease: 'easeOut', delay: 0.05 } },
+                }}
               />
+
+              {/* Plane flying across the name */}
+              <motion.span
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-1 left-0 text-sunset-gold"
+                variants={{
+                  rest: { x: '-10%', opacity: 0 },
+                  hover: {
+                    x: ['-10%', '108%'],
+                    opacity: [0, 1, 1, 0],
+                    rotate: [-4, 8, -4],
+                    transition: { duration: 0.85, ease: 'easeInOut' },
+                  },
+                }}
+              >
+                <PlaneIcon className="h-4 w-4" />
+              </motion.span>
             </motion.span>
             <span className="mt-2 block text-2xl font-medium text-neutral-400 sm:text-3xl">
               <span className="text-gradient-sunset">{profile.role}</span>

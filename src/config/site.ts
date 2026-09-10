@@ -36,56 +36,55 @@ export const fallbackSkills = [
   'Docker',
 ]
 
-export type Project = {
-  id: string
+export type PinnedProject = {
+  // Must match the GitHub repo name (case-insensitive) so it can be merged
+  // with — or override the description/tags of — the live-fetched version.
+  repo: string
   title: string
   description: string
   tags: string[]
-  github?: string
-  live?: string
-  featured?: boolean
+  github: string
 }
 
-// Used only as a fallback if the live GitHub repos fetch fails or
-// github.username isn't set — otherwise /projects and the homepage preview
-// pull real, up-to-date repos straight from your GitHub account.
-export const projects: Project[] = [
+// Hand-curated projects — written from the actual repos/READMEs. These are
+// always shown: a pinned entry whose `repo` also shows up in your public
+// GitHub repos gets its title/description/tags merged in there; one that
+// doesn't (e.g. a private repo GitHub's public API can't see) is still
+// listed on its own. This is also what's shown if the live fetch fails.
+// No `live` field on purpose — point people at the source instead of a
+// deployment that might be sleeping/torn down.
+export const pinnedProjects: PinnedProject[] = [
   {
-    id: 'project-alpha',
-    title: '[Project Alpha]',
+    repo: 'splendor',
+    title: 'Splendor',
     description:
-      'A full-stack web application for [use case] — real-time data, responsive UI, scalable backend.',
-    tags: ['React', 'Node.js', 'PostgreSQL'],
-    github: 'https://github.com/[your-github-username]/project-alpha',
-    live: '',
-    featured: true,
+      'A Java implementation of the board game Splendor, with one shared rules engine powering both a console client and a web client, plus three tiers of AI opponents (easy/medium/hard) built with the Strategy pattern.',
+    tags: ['Java', 'Game AI', 'Web'],
+    github: 'https://github.com/vanetiaho/splendor',
   },
   {
-    id: 'project-beta',
-    title: '[Project Beta]',
-    description: 'A pipeline / tool for [problem], with automated processing and a clean API.',
-    tags: ['Python', 'FastAPI', 'Docker'],
-    github: 'https://github.com/[your-github-username]/project-beta',
-    live: '',
-    featured: true,
+    repo: 'dejaview',
+    title: 'DejaView',
+    description:
+      'An AI-powered Chrome extension that passively tracks fashion items you browse, then uses generative AI to recommend outfit pairings and generate virtual try-ons through a Supabase-backed serverless pipeline.',
+    tags: ['Chrome Extension', 'React', 'Supabase', 'Generative AI'],
+    github: 'https://github.com/vanetiaho/dejaview',
   },
   {
-    id: 'project-gamma',
-    title: '[Project Gamma]',
-    description: 'A mobile-first progressive web app for [purpose], optimized and offline-capable.',
-    tags: ['React', 'PWA', 'Tailwind'],
-    github: 'https://github.com/[your-github-username]/project-gamma',
-    live: '',
-    featured: false,
+    repo: 'wad22',
+    title: 'Map N Mug',
+    description:
+      'A Vue + Supabase web app for finding study-friendly cafés — filter by WiFi, noise, and outlet availability, with a live map, crowd-level updates, reviews, and a gamified rewards system.',
+    tags: ['Vue', 'Supabase', 'Maps'],
+    github: 'https://github.com/vanetiaho/wad22',
   },
   {
-    id: 'project-delta',
-    title: '[Project Delta]',
-    description: 'A CLI tool automating [workflow], saving hours per week.',
-    tags: ['Go', 'CLI', 'GitHub API'],
-    github: 'https://github.com/[your-github-username]/project-delta',
-    live: '',
-    featured: false,
+    repo: 'loanprocessingplatform',
+    title: 'Loan.ly',
+    description:
+      'A team-built microservices loan processing platform (IS213, group project) demonstrating three enterprise integration patterns — orchestrated credit assessment, parallel-aggregated admin review, and event-driven repayment tracking — across 8 services behind a Kong API gateway, using REST, gRPC, and RabbitMQ.',
+    tags: ['Microservices', 'Docker', 'gRPC', 'RabbitMQ'],
+    github: 'https://github.com/vanetiaho/LoanProcessingPlatform',
   },
 ]
 

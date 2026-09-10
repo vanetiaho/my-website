@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import PlaneIcon from '@/components/icons/PlaneIcon'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Home' },
@@ -33,9 +34,10 @@ export default function Navbar() {
       >
         <NavLink
           to="/"
-          className="interactive mr-1 hidden select-none items-center px-3 font-display text-sm font-semibold text-sunset-gold sm:flex"
+          className="interactive mr-1 hidden select-none items-center px-3 text-sunset-gold sm:flex"
+          aria-label="Home"
         >
-          ✈
+          <PlaneIcon className="h-4 w-4" />
         </NavLink>
         {NAV_ITEMS.map((item) => (
           <NavLink

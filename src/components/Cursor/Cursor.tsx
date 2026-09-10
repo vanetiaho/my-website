@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useIsTouchDevice } from '@/hooks/useIsTouchDevice'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import PlaneIcon from '@/components/icons/PlaneIcon'
 
 export default function Cursor() {
   const isTouch = useIsTouchDevice()
@@ -69,9 +70,7 @@ export default function Cursor() {
         className="fixed left-0 top-0 transition-[color] duration-150"
         style={{ willChange: 'transform' }}
       >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M2 12l7-1 3-4 1 .3-2 4.7 6 .5-1 1.3-6 .2-2 3.5-1-.2.7-3z" />
-        </svg>
+        <PlaneIcon className="h-[22px] w-[22px]" />
       </div>
     </div>
   )

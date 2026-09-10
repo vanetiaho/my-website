@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useAppStore } from '@/store/useAppStore'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { PLANE_PATH } from '@/components/icons/PlaneIcon'
 
 const AUTO_RESOLVE_MS = 2600
 
@@ -84,16 +85,15 @@ export default function Entrance({ onDone }: { onDone: () => void }) {
           transition={{ duration: 1.4, delay: 0.4, ease: 'easeInOut' }}
         />
 
-        {/* Plane crossing */}
+        {/* Plane crossing — same silhouette as the navbar mark and cursor */}
         <motion.g
-          initial={{ x: -60, y: 20, opacity: 0 }}
-          animate={{ x: 420, y: -10, opacity: [0, 1, 1, 0] }}
+          initial={{ x: -60, y: 100, opacity: 0 }}
+          animate={{ x: 420, y: 70, opacity: [0, 1, 1, 0] }}
           transition={{ duration: 2.2, delay: 0.6, ease: 'easeIn' }}
         >
-          <path
-            d="M0 90 L26 88 L40 78 L44 79 L34 90 L46 92 L40 96 L26 93 L4 96 Z"
-            fill="#f4e9dd"
-          />
+          <svg x={0} y={0} width={40} height={40} viewBox="0 0 24 24" fill="#f4e9dd">
+            <path d={PLANE_PATH} />
+          </svg>
         </motion.g>
       </svg>
 

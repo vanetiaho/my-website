@@ -1,15 +1,16 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { projects as fallbackProjects } from '@/config/site'
+import { pinnedProjects } from '@/config/site'
 import { useGithubRepos } from '@/hooks/useGithubRepos'
-import { reposToProjects } from '@/lib/github'
+import { mergeWithPinned, reposToProjects } from '@/lib/github'
 
 export default function ProjectsPreview() {
   const { repos, status } = useGithubRepos()
-  const featured =
+  const projects =
     status === 'ready' && repos.length > 0
-      ? reposToProjects(repos).slice(0, 3)
-      : fallbackProjects.filter((p) => p.featured).slice(0, 3)
+      ? mergeWithPinned(reposToProjects(repos), pinnedProjects)
+      : pinnedProjects.map((p) => ({ id: p.repo, ...p }))
+  const featured = projects.slice(0, 3)
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-24 lg:px-8">
@@ -32,7 +33,7 @@ export default function ProjectsPreview() {
         {featured.map((project, i) => (
           <motion.a
             key={project.id}
-            href={project.live || project.github || '#'}
+            href={project.github || '#'}
             target="_blank"
             rel="noopener noreferrer"
             className="interactive group glass-panel relative overflow-hidden rounded-2xl p-6 transition-transform hover:-translate-y-1"

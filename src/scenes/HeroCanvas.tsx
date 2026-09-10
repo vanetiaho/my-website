@@ -1,31 +1,8 @@
 import { Suspense, useRef } from 'react'
 import { Canvas, useFrame, type ThreeElements } from '@react-three/fiber'
-import { Float, MeshDistortMaterial, OrbitControls, Sphere } from '@react-three/drei'
+import { Float, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-
-function SunsetSphere() {
-  const materialRef = useRef<any>(null)
-  useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.distort = 0.35 + Math.sin(state.clock.elapsedTime * 0.5) * 0.08
-    }
-  })
-  return (
-    <Sphere args={[1.5, 96, 96]}>
-      <MeshDistortMaterial
-        ref={materialRef}
-        color="#e8934a"
-        emissive="#c1502e"
-        emissiveIntensity={0.35}
-        roughness={0.25}
-        metalness={0.1}
-        distort={0.35}
-        speed={1.4}
-      />
-    </Sphere>
-  )
-}
 
 function OtterPilot(props: ThreeElements['group']) {
   const fur = '#8a5a3b'
@@ -87,7 +64,7 @@ function OtterPilot(props: ThreeElements['group']) {
 
 function PaperPlane(props: ThreeElements['group']) {
   return (
-    <group {...props} rotation={[0.15, 2.4, -0.1]} scale={1.25}>
+    <group {...props} rotation={[0.15, 2.4, -0.1]} scale={2.1}>
       {/* Fuselage */}
       <mesh position={[0, 0, 0.3]} rotation={[Math.PI / 2, 0, 0]}>
         <coneGeometry args={[0.16, 1.3, 4]} />
@@ -121,8 +98,7 @@ function Rig({ reduced }: { reduced: boolean }) {
   return (
     <group ref={group}>
       <Float speed={1.6} rotationIntensity={0.4} floatIntensity={0.8}>
-        <SunsetSphere />
-        <PaperPlane position={[0.85, 0.25, 1.3]} />
+        <PaperPlane position={[0, -0.1, 0]} />
       </Float>
     </group>
   )
