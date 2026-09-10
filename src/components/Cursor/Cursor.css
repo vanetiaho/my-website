@@ -1,0 +1,68 @@
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  transition-property: width, height, background, border-color, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-orange);
+}
+
+.cursor-ring {
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid rgba(255, 107, 53, 0.6);
+  background: transparent;
+  /* Ring uses RAF for lag, no CSS transition on position */
+}
+
+/* Hover state */
+.cursor-dot.hovering {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-purple);
+}
+
+.cursor-ring.hovering {
+  width: 52px;
+  height: 52px;
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(139, 92, 246, 0.05);
+}
+
+/* Clicking state */
+.cursor-dot.clicking {
+  width: 12px;
+  height: 12px;
+  background: var(--accent-orange);
+}
+
+.cursor-ring.clicking {
+  width: 28px;
+  height: 28px;
+  border-color: rgba(255, 107, 53, 0.9);
+}
+
+@media (pointer: coarse) {
+  /* Hide custom cursor on touch devices */
+  .cursor-dot,
+  .cursor-ring {
+    display: none;
+  }
+  body {
+    cursor: auto;
+  }
+  a, button, [role="button"] {
+    cursor: pointer;
+  }
+}

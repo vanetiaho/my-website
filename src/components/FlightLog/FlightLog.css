@@ -1,0 +1,199 @@
+.flightlog-section {
+  position: relative;
+  background: var(--bg-2);
+}
+
+.flightlog-header {
+  margin-bottom: 40px;
+}
+
+.flightlog-title {
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  margin-bottom: 8px;
+}
+
+.flightlog-desc {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+/* Stats */
+.flightlog-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.flightlog-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 20px;
+}
+
+.stat-icon {
+  font-size: 1.1rem;
+  color: var(--accent-orange);
+  margin-bottom: 4px;
+}
+
+.stat-val {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.stat-lbl {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Graph wrapper */
+.flightlog-graph-wrap {
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: 32px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  overflow-x: auto;
+}
+
+.flightlog-graph-wrap.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* HUD label */
+.graph-hud-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+/* Graph layout */
+.graph-container {
+  display: flex;
+  gap: 4px;
+  align-items: start;
+  min-width: max-content;
+}
+
+.graph-days {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 2px;
+  margin-right: 4px;
+}
+
+.graph-day-label {
+  font-size: 0.6rem;
+  color: var(--text-faint);
+  height: 11px;
+  line-height: 11px;
+  width: 28px;
+  text-align: right;
+}
+
+.graph-weeks {
+  display: flex;
+  gap: 3px;
+}
+
+.graph-week {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* Cells */
+.graph-cell {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  opacity: 0;
+  transform: scale(0);
+}
+
+.graph-cell.animate {
+  animation: scaleIn 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.graph-cell:hover {
+  transform: scale(1.4);
+  z-index: 2;
+}
+
+/* Level colors — sunset palette */
+.level-0 { background: var(--surface-2); }
+.level-1 { background: rgba(255, 107, 53, 0.25); box-shadow: none; }
+.level-2 { background: rgba(255, 107, 53, 0.50); }
+.level-3 { background: rgba(255, 107, 53, 0.78); }
+.level-4 {
+  background: var(--accent-orange);
+  box-shadow: 0 0 6px rgba(255,107,53,0.5);
+}
+
+.graph-cell.level-4:hover {
+  box-shadow: 0 0 12px rgba(255,107,53,0.8);
+}
+
+/* Month labels */
+.graph-months {
+  display: flex;
+  gap: 0;
+  margin-top: 8px;
+  padding-left: 32px;
+}
+
+.graph-month {
+  flex: 1;
+  font-size: 0.62rem;
+  color: var(--text-faint);
+  min-width: 0;
+}
+
+/* Legend */
+.graph-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+  justify-content: flex-end;
+}
+
+.legend-label {
+  font-size: 0.62rem;
+  color: var(--text-faint);
+}
+
+.legend-cell {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+}
+
+.flightlog-cta {
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .flightlog-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .flightlog-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+}

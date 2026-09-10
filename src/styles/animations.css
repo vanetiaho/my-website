@@ -1,0 +1,221 @@
+/* =========================================================
+   ANIMATIONS LIBRARY
+   ========================================================= */
+
+/* Fade in up */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Fade in down */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide in from left */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Slide in from right */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Float (for airplane) */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-18px) rotate(2deg);
+  }
+}
+
+/* Float subtle */
+@keyframes floatSubtle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Spin (vinyl) */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Pulse glow */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 107, 53, 0.7), 0 0 60px rgba(255, 107, 53, 0.3);
+  }
+}
+
+/* Blink cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Runway lights */
+@keyframes runwayLight {
+  0%, 100% { opacity: 0.2; }
+  50%       { opacity: 1; }
+}
+
+/* Star twinkle */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Scroll bounce */
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(8px); }
+}
+
+/* Takeoff (entrance animation) */
+@keyframes takeoff {
+  0% {
+    transform: translate(-50%, -50%) rotate(-5deg);
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(120vw, -120vh) rotate(25deg);
+    opacity: 0;
+  }
+}
+
+/* Cursor ring expand */
+@keyframes cursorRingExpand {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* Scale in */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Progress bar fill */
+@keyframes progressFill {
+  from { width: 0%; }
+  to   { width: var(--target-width, 100%); }
+}
+
+/* Dash draw */
+@keyframes dashDraw {
+  from { stroke-dashoffset: 1000; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* Gradient shift */
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Noise (entrance screen grain) */
+@keyframes noise {
+  0%, 100% { transform: translate(0, 0); }
+  10%       { transform: translate(-2%, -3%); }
+  20%       { transform: translate(2%, 3%); }
+  30%       { transform: translate(-3%, 1%); }
+  40%       { transform: translate(3%, -1%); }
+  50%       { transform: translate(-1%, 2%); }
+  60%       { transform: translate(1%, -2%); }
+  70%       { transform: translate(-2%, 2%); }
+  80%       { transform: translate(2%, -2%); }
+  90%       { transform: translate(-1%, 3%); }
+}
+
+/* Utility animation classes */
+.animate-fadeInUp {
+  animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease both;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-floatSubtle {
+  animation: floatSubtle 4s ease-in-out infinite;
+}
+
+.animate-spin {
+  animation: spin 3s linear infinite;
+}
+
+.animate-spin-paused {
+  animation: spin 3s linear infinite;
+  animation-play-state: paused;
+}

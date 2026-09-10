@@ -1,0 +1,137 @@
+.minigame-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.25s ease both;
+}
+
+.minigame-modal {
+  background: var(--surface);
+  border: 1px solid rgba(255, 107, 53, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 640px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 0 60px rgba(255, 107, 53, 0.15), 0 24px 64px rgba(0,0,0,0.6);
+  animation: scaleIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.minigame-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.minigame-title {
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  color: var(--accent-orange);
+  text-transform: uppercase;
+}
+
+.minigame-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  font-family: var(--font-sans);
+}
+
+.minigame-close:hover {
+  border-color: rgba(255,107,53,0.4);
+  color: var(--accent-orange);
+}
+
+.minigame-canvas-wrap {
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.minigame-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+}
+
+/* Game over overlay */
+.minigame-gameover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(5, 5, 15, 0.85);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+.gameover-icon {
+  font-size: 2.5rem;
+}
+
+.gameover-score {
+  font-size: 1.1rem;
+  color: var(--accent-orange);
+}
+
+.gameover-best {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Touch controls */
+.minigame-touch-controls {
+  display: none;
+  gap: 12px;
+}
+
+.touch-btn {
+  flex: 1;
+  padding: 14px;
+  background: rgba(255,107,53,0.1);
+  border: 1px solid rgba(255,107,53,0.25);
+  border-radius: var(--radius-sm);
+  color: var(--accent-orange);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  transition: all var(--transition-fast);
+}
+
+.touch-btn:active {
+  background: rgba(255,107,53,0.25);
+}
+
+@media (pointer: coarse) {
+  .minigame-touch-controls {
+    display: flex;
+  }
+}
+
+.minigame-hint {
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  text-align: center;
+  letter-spacing: 0.05em;
+}
