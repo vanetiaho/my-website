@@ -1,115 +1,89 @@
-# ✈ Developer Portfolio
+# ✈ Sunset Flight Portfolio
 
-A **modern, dark, aviation-themed** personal developer portfolio built with React + Vite, deployed automatically to GitHub Pages via GitHub Actions.
+A personal developer portfolio with a "golden hour on a runway" aesthetic — dark base UI,
+sunset gradients, and light aviation motifs. Built with React, TypeScript, Tailwind CSS,
+Framer Motion, React Three Fiber, GSAP, and Zustand.
 
-## ✨ Features
+## Tech stack
 
-- **Entrance screen** with animated runway & airplane takeoff
-- **Floating pill navbar** with glassmorphism & active section tracking
-- **Hero** with parallax airplane, typewriter titles, and sunset gradients
-- **About** with skill tags, animated progress bars, and stats
-- **Projects grid** with 3D tilt effect and filter
-- **Flight Log** — GitHub contribution graph styled as an aviation logbook
-- **Music section** with spinning vinyl record UI and Spotify link (no autoplay)
-- **Hidden mini-game** — triple-click the hero airplane to unlock!
-- **Contact form** with social links and aviation callsign footer
-- **Custom cursor** with lag-ring follow effect
-- Fully **responsive** (mobile, tablet, desktop)
-- **Accessible** (ARIA labels, skip links, focus-visible, keyboard nav)
-- **SEO** optimized with Open Graph tags
+- **React 18 + Vite + TypeScript**
+- **Tailwind CSS** — styling
+- **Framer Motion** — UI and page transitions
+- **React Three Fiber + drei** — the 3D hero scene
+- **GSAP + ScrollTrigger** — the scroll-driven flight-path indicator
+- **Zustand** — entrance/session state
+- **React Router** — `/`, `/projects`, `/music`, `/play`, `/contact`
 
-## 🚀 Getting Started
+## Getting started
 
 ```bash
-# Install dependencies
 npm install
-
-# Start dev server
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
+npm run dev       # start dev server
+npm run build     # production build (tsc + vite build)
+npm run preview   # preview the production build
 ```
 
-## 🌐 GitHub Pages Deployment
+## Make it yours
 
-### One-time setup
+Almost everything personal lives in **one file**: [`src/config/site.ts`](src/config/site.ts).
+Edit that to set:
 
-1. **Update `vite.config.js`** — change `base` to match your repo name:
-   ```js
-   base: '/your-repo-name/',
-   ```
+- Your name, role, tagline, bio, location, email, resume link
+- Social links (GitHub, LinkedIn, Twitter)
+- Skills and proficiency levels
+- Projects (title, description, tags, links)
+- Music: a Spotify share link (track/album/playlist) for the embedded player, your
+  Spotify profile link, and a list of favorite tracks for the carousel
+- Your GitHub username, for the live contribution graph on `/projects`
 
-2. **Enable GitHub Pages** in your repo:
-   - Go to **Settings → Pages**
-   - Source: **Deploy from a branch**
-   - Branch: `gh-pages` / `/ (root)`
+No API keys or tokens required — the GitHub graph uses a public, unauthenticated endpoint
+([github-contributions-api.jogruber.de](https://github-contributions-api.jogruber.de)) and
+the music player uses Spotify's public embed iframe, so this works entirely client-side and
+deploys as a static site (Vercel/Netlify/GitHub Pages).
 
-3. **Push to `main`** — the GitHub Actions workflow deploys automatically!
+### What I'd want from you to fully personalize this
 
-### Manual deployment
-```bash
-npm run build
-# Then push the dist/ folder to gh-pages branch
-```
+- **Name, role/tagline, short bio, location, email**
+- **GitHub username** — powers the contribution graph and project source links
+- **Spotify** — a share link to a playlist/track you want featured, your profile link, and
+  a handful of favorite tracks (title + artist, optionally their own Spotify links)
+- **Social links** — LinkedIn / Twitter handles (or drop the ones you don't use)
+- **Real projects** — title, one-line description, tags, GitHub/live links
+- Optionally: a resume PDF link, and a headshot/illustration if you want an avatar
 
-## 🎨 Personalizing
+## Deploying
 
-### Replace placeholders
-Search for `[YOUR NAME]`, `[GITHUB]`, `[SPOTIFY]`, `[LINKEDIN]`, `[TWITTER]`, `[EMAIL]`, `[YOUR CITY]` and replace with your real info.
+- **Vercel / Netlify**: point either at this repo, build command `npm run build`, output
+  directory `dist`. No environment variables needed.
+- **GitHub Pages**: a workflow is already set up at
+  [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). Since Pages serves from a
+  repo subpath, it builds with `VITE_BASE_PATH=/<repo-name>/` — update that value in the
+  workflow if your repo name changes.
 
-### Projects
-Edit [`src/data/projects.js`](src/data/projects.js) to add your projects.
-
-### Skills
-Edit [`src/data/skills.js`](src/data/skills.js) to update your skills and proficiency levels.
-
-### Music tracks
-Edit the `TRACKS` array in [`src/components/Music/Music.jsx`](src/components/Music/Music.jsx).
-
-### Design tokens
-All colors and spacing are in [`src/styles/globals.css`](src/styles/globals.css) CSS custom properties.
-
-## 🎮 Easter Egg
-
-**Triple-click the airplane** in the hero section to unlock the hidden side-scrolling dodge game!
-
-## 🛠 Tech Stack
-
-| Tool | Purpose |
-|------|---------|
-| React 18 | UI framework |
-| Vite 4 | Build tool |
-| CSS (custom properties) | Styling — no framework |
-| GitHub Actions | CI/CD |
-| GitHub Pages | Hosting |
-
-## 📁 Project Structure
+## Project structure
 
 ```
 src/
-├── components/
-│   ├── Cursor/        # Custom cursor
-│   ├── Entrance/      # Landing screen
-│   ├── Navbar/        # Floating pill nav
-│   ├── Hero/          # Hero + parallax plane
-│   ├── About/         # Bio + skills
-│   ├── Projects/      # Project grid
-│   ├── FlightLog/     # GitHub contribution graph
-│   ├── Music/         # Vinyl record + tracks
-│   ├── MiniGame/      # Hidden canvas game
-│   └── Contact/       # Contact form + footer
-├── data/
-│   ├── projects.js    # Centralized project data
-│   └── skills.js      # Centralized skills data
-└── styles/
-    ├── globals.css    # Design tokens + resets
-    └── animations.css # Keyframe library
+├── components/     # Cursor, Navbar, Entrance, FlightProgress, Vinyl, GithubCalendar, ...
+├── config/         # site.ts — all personalization data
+├── game/           # PlaneGame.tsx — the /play canvas mini-game
+├── hooks/          # useReducedMotion, useIsTouchDevice
+├── lib/            # small utilities (Spotify URL parsing, etc.)
+├── pages/          # route-level components (Home, Projects, Music, Play, Contact)
+├── scenes/         # HeroCanvas.tsx — the R3F 3D scene
+├── sections/        # Home page sections (Hero, About, ProjectsPreview)
+├── store/          # Zustand store
+└── styles/         # Tailwind entry + global CSS
 ```
 
----
+## Notes
+
+- The entrance animation plays once per browser session (tracked via `sessionStorage`),
+  and is skippable by click, scroll, or keypress.
+- The 3D hero, the mini-game, and Spotify embed are all lazy-loaded so they don't block
+  first paint.
+- `prefers-reduced-motion` is respected throughout — the entrance, cursor trail, 3D
+  parallax, and scroll indicator all fall back to static/instant behavior.
+- The custom cursor and drag-to-rotate 3D scene automatically disable on touch devices.
 
 Built with ♥ and ☕ at altitude.
