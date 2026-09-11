@@ -95,14 +95,14 @@ export const pinnedProjects: PinnedProject[] = allProjects.filter((p) => p.pinne
 export const music = {
   // Paste any Spotify share link (track, album, or playlist) — open.spotify.com/...
   // It's converted into an embeddable player automatically.
-  featuredSpotifyUrl: 'https://open.spotify.com/playlist/4d14FSQi5XrsuuJntZycMC?si=de65551b72ae4468',
+  featuredSpotifyUrl: 'https://open.spotify.com/playlist/2cQi1uihMnjdxGBvbZSXY1?si=bef4044585c4421e',
   profileUrl: 'https://open.spotify.com/user/21p66homcn5dj3sbrmdlfhfwq',
   favorites: [
-    { title: '[Track One]', artist: '[Artist]', spotifyUrl: '' },
-    { title: '[Track Two]', artist: '[Artist]', spotifyUrl: '' },
-    { title: '[Track Three]', artist: '[Artist]', spotifyUrl: '' },
-    { title: '[Track Four]', artist: '[Artist]', spotifyUrl: '' },
-    { title: '[Track Five]', artist: '[Artist]', spotifyUrl: '' },
+    { title: 'Separate Lives', artist: 'Phil Collins, Marilyn Martin', audioUrl: '/music/track-one.mp3' },
+    { title: 'Make You Feel My Love', artist: 'Bob Dylan', audioUrl: '/music/track-two.mp3' },
+    { title: "Love Me Like There's No Tomorrow", artist: 'Freddie Mercury', audioUrl: '/music/track-three.mp3' },
+    { title: 'for lovers who hesitate', artist: 'JANNABI', audioUrl: '/music/track-four.mp3' },
+    { title: '下凡', artist: 'Pets Tseng', audioUrl: '/music/track-five.mp3' },
   ],
 }
 
