@@ -8,8 +8,9 @@ type Day = { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 }
 type Week = { start: string; end: string; total: number; level: 0 | 1 | 2 | 3 | 4 }
 type Status = 'loading' | 'ready' | 'error' | 'unset'
 
-const API_URL = (username: string) =>
-  `https://github-contributions-api.jogruber.de/rest/v1/${username}?y=last`
+// v4 is the current endpoint — the API previously lived at /rest/v1/, which
+// now fails outright and was the real cause of the graph never loading.
+const API_URL = (username: string) => `https://github-contributions-api.jogruber.de/v4/${username}?y=last`
 
 function isValidPayload(data: unknown): data is { contributions: Day[] } {
   return (
@@ -19,12 +20,15 @@ function isValidPayload(data: unknown): data is { contributions: Day[] } {
   )
 }
 
-/** Fetches once with a timeout; retries a single time after a short delay
- *  before giving up, since the third-party API is occasionally just slow
- *  rather than actually down. */
+const RETRY_DELAYS_MS = [800, 2000]
+
+/** Fetches with a timeout, retrying a couple of times with backoff before
+ *  giving up — the API is community-run and occasionally just slow rather
+ *  than actually down. Never sends cache-control: no-cache (that opts out
+ *  of the API's own cache and counts against its stricter rate limit). */
 async function fetchContributions(username: string, attempt = 0): Promise<Day[]> {
   const controller = new AbortController()
-  const timeout = window.setTimeout(() => controller.abort(), 9000)
+  const timeout = window.setTimeout(() => controller.abort(), 8000)
   try {
     const res = await fetch(API_URL(username), { signal: controller.signal })
     if (!res.ok) throw new Error(`bad response: ${res.status}`)
@@ -32,8 +36,8 @@ async function fetchContributions(username: string, attempt = 0): Promise<Day[]>
     if (!isValidPayload(data)) throw new Error('unexpected payload shape')
     return data.contributions
   } catch (err) {
-    if (attempt === 0) {
-      await new Promise((r) => window.setTimeout(r, 1000))
+    if (attempt < RETRY_DELAYS_MS.length) {
+      await new Promise((r) => window.setTimeout(r, RETRY_DELAYS_MS[attempt]))
       return fetchContributions(username, attempt + 1)
     }
     throw err

@@ -1,5 +1,5 @@
-import { Suspense, lazy, useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { Suspense, lazy } from 'react'
+import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { profile } from '@/config/site'
 import PlaneIcon, { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
@@ -9,24 +9,10 @@ const HeroCanvas = lazy(() => import('@/scenes/HeroCanvas'))
 const nameLetters = profile.name.split('')
 
 export default function Hero() {
-  const sectionRef = useRef<HTMLElement>(null)
   const reduced = useReducedMotion()
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] })
-  const bgY = useTransform(scrollYProgress, [0, 1], reduced ? ['0%', '0%'] : ['0%', '22%'])
-  const bgOpacity = useTransform(scrollYProgress, [0, 1], reduced ? [0.7, 0.7] : [0.7, 0.25])
 
   return (
-    <section ref={sectionRef} className="relative flex min-h-[100svh] items-center overflow-hidden pt-24">
-      <motion.div
-        className="absolute inset-0 -z-10 bg-sunset-radial"
-        style={{
-          y: bgY,
-          opacity: bgOpacity,
-          maskImage: 'linear-gradient(to bottom, black 55%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 55%, transparent 100%)',
-        }}
-      />
-
+    <section className="relative flex min-h-[100svh] items-center overflow-hidden pt-24">
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-2 lg:gap-4 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -85,7 +71,7 @@ export default function Hero() {
                     : {
                         x: ['-6%', '100%'],
                         opacity: [0, 1, 1, 1, 0],
-                        transition: { duration: 1, ease: [0.65, 0, 0.35, 1] },
+                        transition: { duration: 2.1, ease: [0.65, 0, 0.35, 1] },
                       },
                 }}
               >
@@ -96,7 +82,7 @@ export default function Hero() {
                     rest: { rotate: 0 },
                     hover: {
                       rotate: [-3, 4, -2, 3, 0],
-                      transition: { duration: 1, ease: [0.65, 0, 0.35, 1] },
+                      transition: { duration: 2.1, ease: [0.65, 0, 0.35, 1] },
                     },
                   }}
                 >

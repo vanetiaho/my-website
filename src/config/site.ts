@@ -59,12 +59,12 @@ export const pinnedProjects: PinnedProject[] = [
     github: 'https://github.com/vanetiaho/splendor',
   },
   {
-    repo: 'loanprocessingplatform',
-    title: 'Loan.ly',
+    repo: 'dejaview',
+    title: 'DejaView',
     description:
-      'A microservices loan processing platform demonstrating three enterprise integration patterns — orchestrated credit assessment, parallel-aggregated admin review, and event-driven repayment tracking — across 8 services behind a Kong API gateway, using REST, gRPC, and RabbitMQ.',
-    tags: ['Python', 'JavaScript', 'Microservices', 'Docker', 'OutSystems'],
-    github: 'https://github.com/vanetiaho/LoanProcessingPlatform',
+      'An AI-powered Chrome extension that passively tracks clothing you browse online, builds a personal fashion closet, and uses generative AI to recommend complementary outfits with virtual try-on — content scripts for gaze/intent detection, a Supabase-synced background worker, and a Vercel serverless backend for the AI calls.',
+    tags: ['JavaScript', 'Chrome Extension', 'Supabase', 'Generative AI'],
+    github: 'https://github.com/vanetiaho/dejaview',
   },
   {
     repo: 'wad22',

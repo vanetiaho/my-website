@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { profile, socials } from '@/config/site'
 import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+import { GithubIcon, LinkedinIcon, MailIcon } from '@/components/icons/SocialIcons'
 
 const SOCIAL_LINKS = [
-  { label: 'GitHub', href: `https://github.com/${socials.github}` },
-  { label: 'LinkedIn', href: `https://linkedin.com/in/${socials.linkedin}` },
-  { label: 'Email', href: `mailto:${profile.email}` },
+  { label: 'GitHub', href: `https://github.com/${socials.github}`, Icon: GithubIcon },
+  { label: 'LinkedIn', href: `https://linkedin.com/in/${socials.linkedin}`, Icon: LinkedinIcon },
+  { label: 'Email', href: `mailto:${profile.email}`, Icon: MailIcon },
 ]
 
 export default function Contact() {
@@ -55,9 +56,11 @@ export default function Contact() {
                 href={s.href}
                 target={s.href.startsWith('http') ? '_blank' : undefined}
                 rel={s.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                className="interactive rounded-full border border-white/15 px-4 py-2 font-mono text-sm text-neutral-300 hover:border-sunset-amber/60 hover:text-sunset-gold"
+                aria-label={s.label}
+                title={s.label}
+                className="interactive flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-neutral-300 transition-colors hover:border-sunset-amber/60 hover:text-sunset-gold"
               >
-                {s.label}
+                <s.Icon className="h-[18px] w-[18px]" />
               </a>
             ))}
           </div>

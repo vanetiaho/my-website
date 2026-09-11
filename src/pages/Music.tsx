@@ -5,6 +5,7 @@ import Vinyl from '@/components/Vinyl/Vinyl'
 import { toSpotifyEmbedUrl, toSpotifyUri } from '@/lib/spotify'
 import { loadSpotifyIframeApi, type SpotifyEmbedController } from '@/lib/spotifyIframeApi'
 import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+import { SpotifyIcon } from '@/components/icons/SocialIcons'
 
 export default function Music() {
   const uri = toSpotifyUri(music.featuredSpotifyUrl)
@@ -69,29 +70,35 @@ export default function Music() {
           transition={{ duration: 0.5 }}
         >
           <Vinyl spinning={isPlaying} onToggle={handleVinylToggle} loading={!!uri && !playerReady && !apiFailed} />
-          <div className="mt-4 flex flex-col items-center gap-1.5 text-center">
-            <p className="text-sm text-neutral-500">
-              {uri
-                ? 'Click the record to play or pause, right here.'
-                : 'Add a Spotify link to play a track right here.'}
-            </p>
-            <a
-              href={music.featuredSpotifyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="interactive font-mono text-xs text-neutral-600 hover:text-sunset-gold"
-            >
-              Open in Spotify ↗
-            </a>
-          </div>
+          <p className="mt-4 text-center text-sm text-neutral-500">
+            {uri
+              ? 'Click the record to play or pause, right here.'
+              : 'Add a Spotify link to play a track right here.'}
+          </p>
 
+          <a
+            href={music.profileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="interactive mx-auto mt-6 flex w-fit items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 font-mono text-sm text-neutral-200 hover:border-sunset-amber/60 hover:text-sunset-gold"
+          >
+            <SpotifyIcon className="h-4 w-4" />
+            Follow on Spotify
+          </a>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
           {uri && !apiFailed && (
-            <div ref={containerRef} className="mt-8 w-full overflow-hidden rounded-2xl" />
+            <div ref={containerRef} className="mb-10 w-full overflow-hidden rounded-2xl" />
           )}
 
           {uri && apiFailed && embedUrl && (
             <iframe
-              className="mt-8 w-full rounded-2xl"
+              className="mb-10 w-full rounded-2xl"
               src={embedUrl}
               width="100%"
               height="352"
@@ -104,7 +111,7 @@ export default function Music() {
           )}
 
           {!uri && (
-            <div className="glass-panel mt-8 rounded-2xl p-6 text-sm text-neutral-500">
+            <div className="glass-panel mb-10 rounded-2xl p-6 text-sm text-neutral-500">
               Add a Spotify track, album, or playlist share link to{' '}
               <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sunset-amber">
                 music.featuredSpotifyUrl
@@ -113,13 +120,7 @@ export default function Music() {
               to play the real thing here.
             </div>
           )}
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
           <h2 className="section-label mb-4">
             <span className="mr-1 inline-block align-[-6px] text-2xl">{PLANE_GLYPH}</span>
             favorites
@@ -143,15 +144,6 @@ export default function Music() {
               </a>
             ))}
           </div>
-
-          <a
-            href={music.profileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="interactive mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 font-mono text-sm text-neutral-200 hover:border-sunset-amber/60 hover:text-sunset-gold"
-          >
-            Follow on Spotify ↗
-          </a>
         </motion.div>
       </div>
     </div>
