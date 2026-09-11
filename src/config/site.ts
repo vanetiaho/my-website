@@ -41,40 +41,56 @@ export type PinnedProject = {
   description: string
   tags: string[]
   github: string
+  /** Shown in the homepage's featured trio, in this array's order. */
+  pinned?: boolean
 }
 
-// The exact, ordered list of projects shown on the homepage and /projects —
-// hand-curated (written from the actual repos/READMEs), including private
-// repos GitHub's public API can't list. Add, remove, or reorder freely; this
-// list is the whole source of truth, nothing gets added automatically.
-// No `live` field on purpose — point people at the source instead of a
-// deployment that might be sleeping/torn down.
-export const pinnedProjects: PinnedProject[] = [
+// The exact, ordered list of projects shown across the homepage and
+// /projects — hand-curated (written from the actual repos/READMEs),
+// including private repos GitHub's public API can't list. Add, remove, or
+// reorder freely; this list is the whole source of truth, nothing gets
+// added automatically. No `live` field on purpose — point people at the
+// source instead of a deployment that might be sleeping/torn down.
+export const allProjects: PinnedProject[] = [
   {
     repo: 'splendor',
     title: 'Splendor',
     description:
-      'A Java implementation of the board game Splendor, with one shared rule engine powering both a console client and a web client, plus three tiers of AI opponents (easy/medium/hard) built with the Strategy pattern.',
+      'A Java implementation of the board game Splendor, with 1 shared rule engine powering both a console client and a web client, plus 3 tiers of AI opponents built with the Strategy pattern.',
     tags: ['Java', 'JavaScript', 'Docker', 'Game AI'],
     github: 'https://github.com/vanetiaho/splendor',
+    pinned: true,
   },
   {
-    repo: 'dejaview',
-    title: 'DejaView',
+    repo: 'loanprocessingplatform',
+    title: 'Loan.ly',
     description:
-      'An AI-powered Chrome extension that passively tracks clothing you browse online, builds a personal fashion closet, and uses generative AI to recommend complementary outfits with virtual try-on — content scripts for gaze/intent detection, a Supabase-synced background worker, and a Vercel serverless backend for the AI calls.',
-    tags: ['JavaScript', 'Chrome Extension', 'Supabase', 'Generative AI'],
-    github: 'https://github.com/vanetiaho/dejaview',
+      'A microservices loan processing platform demonstrating 3 enterprise integration patterns. Orchestrated credit assessment, parallel-aggregated admin review, and event-driven repayment tracking. Built with 8 services behind a Kong API gateway, using REST, gRPC, and RabbitMQ.',
+    tags: ['Python', 'JavaScript', 'Microservices', 'Docker', 'OutSystems'],
+    github: 'https://github.com/vanetiaho/LoanProcessingPlatform',
+    pinned: true,
   },
   {
     repo: 'wad22',
     title: 'Map N Mug',
     description:
-      'A Vue + Supabase web app for finding study-friendly cafés — filter by WiFi, noise, and outlet availability, with a live map, crowd-level updates, reviews, and a gamified rewards system.',
+      'A Vue + Supabase web app for finding study-friendly cafés. Filter by WiFi, noise, and outlet availability, with a live map, crowd-level updates, reviews, and a gamified rewards system.',
     tags: ['Vue', 'JavaScript', 'Supabase', 'Google Maps API'],
     github: 'https://github.com/vanetiaho/wad22',
+    pinned: true,
+  },
+  {
+    repo: 'dejaview',
+    title: 'DejaView',
+    description:
+      'An AI-powered Chrome extension that passively tracks clothing you browse online, builds a personal fashion closet, and uses generative AI to recommend complementary outfits with virtual try-on.',
+    tags: ['JavaScript', 'Chrome Extension', 'Generative AI'],
+    github: 'https://github.com/vanetiaho/dejaview',
   },
 ]
+
+// The featured trio shown on the homepage, in allProjects' order.
+export const pinnedProjects: PinnedProject[] = allProjects.filter((p) => p.pinned)
 
 export const music = {
   // Paste any Spotify share link (track, album, or playlist) — open.spotify.com/...

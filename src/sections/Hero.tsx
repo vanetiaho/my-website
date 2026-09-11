@@ -35,7 +35,7 @@ export default function Hero() {
                   rest: { filter: 'drop-shadow(0 0 0px rgba(244,184,96,0))' },
                   hover: { filter: 'drop-shadow(0 0 18px rgba(244,184,96,0.55))' },
                 }}
-                transition={{ duration: 0.4 }}
+                transition={{ duration: 2.1, ease: [0.65, 0, 0.35, 1] }}
               >
                 {nameLetters.map((ch, i) => (
                   <motion.span
@@ -77,16 +77,16 @@ export default function Hero() {
               >
                 <motion.span
                   className="absolute left-0 top-0 inline-block -translate-x-1/2 text-sunset-gold"
-                  style={{ filter: 'drop-shadow(0 2px 6px rgba(244,184,96,0.5))' }}
+                  style={{ filter: 'drop-shadow(0 2px 4px rgba(244,184,96,0.4))' }}
                   variants={{
                     rest: { rotate: 0 },
                     hover: {
                       rotate: [-3, 4, -2, 3, 0],
-                      transition: { duration: 2.1, ease: [0.65, 0, 0.35, 1] },
+                      transition: { duration: 4.1, ease: [0.65, 0, 0.35, 1] },
                     },
                   }}
                 >
-                  <PlaneIcon className="text-4xl leading-none" />
+                  <PlaneIcon className="text-8xl leading-none" />
                 </motion.span>
               </motion.span>
             </motion.span>

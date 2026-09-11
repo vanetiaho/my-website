@@ -51,6 +51,7 @@ const LEVEL_COLOR = ['rgba(255,255,255,0.15)', '#7a5a8a', '#c1682f', '#e8934a', 
 const LEVEL_RADIUS = [2.5, 3.5, 4.5, 5.5, 6.5]
 
 const DATE_FMT = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 function groupByWeek(days: Day[]): Day[][] {
   const weeks: Day[][] = []
@@ -85,21 +86,39 @@ function toWeeklyTotals(days: Day[]): Week[] {
   })
 }
 
-const STEP = 26
+// A fixed intrinsic width, not one that grows with week count — the SVG
+// scales via CSS (w-full) to whatever the panel offers, so a fixed
+// viewBox keeps the CSS scale factor (and therefore marker/text size)
+// roughly the same on a 380px phone as a 1100px desktop, instead of
+// shrinking a wide, week-count-dependent canvas down to near-illegible.
+const INTRINSIC_WIDTH = 860
 const MARGIN = 20
-const HEIGHT = 130
-const BASELINE = 70
-const AMPLITUDE = 22
+const HEIGHT = 152
+const BASELINE = 62
+const AMPLITUDE = 20
 const FREQ = 0.018
+const MONTH_LABEL_Y = HEIGHT - 12
 
 function waveY(x: number) {
   return BASELINE + Math.sin(x * FREQ) * AMPLITUDE
 }
 
+function monthLabelsForWeeks(weeks: Week[]): (string | null)[] {
+  let lastMonth = -1
+  return weeks.map((w) => {
+    if (!w.start) return null
+    const month = new Date(w.start).getUTCMonth()
+    if (month === lastMonth) return null
+    lastMonth = month
+    return MONTHS[month]
+  })
+}
+
 function FlightPath({ weeks }: { weeks: Week[] }) {
   const reduced = useReducedMotion()
   const planeRef = useRef<SVGGElement>(null)
-  const width = MARGIN * 2 + weeks.length * STEP
+  const width = INTRINSIC_WIDTH
+  const step = (width - MARGIN * 2) / Math.max(1, weeks.length)
 
   const pathD = useMemo(() => {
     const points: string[] = []
@@ -112,12 +131,14 @@ function FlightPath({ weeks }: { weeks: Week[] }) {
   const markers = useMemo(
     () =>
       weeks.map((week, i) => {
-        const x = MARGIN + i * STEP + STEP / 2
+        const x = MARGIN + i * step + step / 2
         const y = waveY(x) - week.level * 3.2
         return { ...week, x, y }
       }),
-    [weeks]
+    [weeks, step]
   )
+
+  const monthLabels = useMemo(() => monthLabelsForWeeks(weeks), [weeks])
 
   useAnimationFrame((time) => {
     if (reduced || !planeRef.current) return
@@ -132,10 +153,8 @@ function FlightPath({ weeks }: { weeks: Week[] }) {
 
   return (
     <svg
-      width={width}
-      height={HEIGHT}
       viewBox={`0 0 ${width} ${HEIGHT}`}
-      className="block"
+      className="block h-auto w-full"
       role="img"
       aria-label="GitHub contribution flight path, one waypoint per week"
     >
@@ -182,6 +201,22 @@ function FlightPath({ weeks }: { weeks: Week[] }) {
         </g>
       ))}
 
+      {/* month markers along the bottom, so the timeline reads left-to-right */}
+      {monthLabels.map((label, i) =>
+        label ? (
+          <text
+            key={i}
+            x={MARGIN + i * step}
+            y={MONTH_LABEL_Y}
+            fill="rgba(255,255,255,0.4)"
+            fontSize={11}
+            fontFamily="'JetBrains Mono', ui-monospace, monospace"
+          >
+            {label}
+          </text>
+        ) : null
+      )}
+
       {/* the plane, continuously flying the route */}
       <g ref={planeRef} transform={`translate(${reduced ? width / 2 : 0}, ${waveY(width / 2)})`}>
         <circle r={9} fill="rgba(244,184,96,0.25)" />
@@ -220,7 +255,7 @@ export default function GithubCalendar() {
   }, [usernameSet])
 
   const panelClass =
-    'rounded-2xl border border-white/10 bg-gradient-to-b from-base-900 to-base-950 p-6'
+    'rounded-2xl border border-white/10 bg-gradient-to-b from-base-900/50 to-base-950/50 p-6'
   const panelShadow = {
     boxShadow:
       'inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -1px 16px rgba(0,0,0,0.4), 0 20px 40px -20px rgba(0,0,0,0.6)',
@@ -266,7 +301,7 @@ export default function GithubCalendar() {
   const total = days.reduce((sum, d) => sum + d.count, 0)
 
   return (
-    <div className={`${panelClass} overflow-x-auto`} style={panelShadow}>
+    <div className={panelClass} style={panelShadow}>
       <div className="mb-2 flex items-center justify-between">
         <p className="font-mono text-sm text-neutral-400">
           <span className="text-sunset-gold">{total.toLocaleString()}</span> contributions logged

@@ -45,7 +45,7 @@ export default function Cursor() {
       }
 
       if (planeRef.current) {
-        const scale = hovering ? 1.4 : 1
+        const scale = hovering ? 1.15 : 1
         planeRef.current.style.transform = `translate3d(${planeX}px, ${planeY}px, 0) translate(-50%, -50%) rotate(${angle}deg) scale(${scale})`
         planeRef.current.style.color = hovering ? '#f4b860' : '#e8934a'
       }
@@ -82,7 +82,7 @@ export default function Cursor() {
       />
       <div
         ref={planeRef}
-        className="fixed left-0 top-0 text-[45px] leading-none transition-[color] duration-150"
+        className="fixed left-0 top-0 text-[34px] leading-none transition-[color] duration-150"
         style={{
           willChange: 'transform',
           filter: 'drop-shadow(0 0 6px rgba(244,184,96,0.65))',

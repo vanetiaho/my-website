@@ -82,8 +82,7 @@ export default function Music() {
             rel="noopener noreferrer"
             className="interactive mx-auto mt-6 flex w-fit items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 font-mono text-sm text-neutral-200 hover:border-sunset-amber/60 hover:text-sunset-gold"
           >
-            <SpotifyIcon className="h-4 w-4" />
-            Follow on Spotify
+            Follow on <SpotifyIcon className="h-4 w-4" />
           </a>
         </motion.div>
 
@@ -122,7 +121,7 @@ export default function Music() {
           )}
 
           <h2 className="section-label mb-4">
-            <span className="mr-1 inline-block align-[-6px] text-2xl">{PLANE_GLYPH}</span>
+            <span className="mt-10 mr-1 inline-block align-[-6px] text-2xl">{PLANE_GLYPH}</span>
             favorites
           </h2>
           <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 lg:mx-0 lg:grid lg:grid-cols-1 lg:gap-3 lg:overflow-visible lg:px-0">

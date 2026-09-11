@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { pinnedProjects } from '@/config/site'
+import { allProjects } from '@/config/site'
 import GithubCalendar from '@/components/GithubCalendar/GithubCalendar'
 import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
@@ -8,12 +8,12 @@ export default function Projects() {
   const [filter, setFilter] = useState<string | null>(null)
 
   const allTags = useMemo(
-    () => Array.from(new Set(pinnedProjects.flatMap((p) => p.tags))),
+    () => Array.from(new Set(allProjects.flatMap((p) => p.tags))),
     []
   )
   const visible = filter
-    ? pinnedProjects.filter((p) => p.tags.includes(filter))
-    : pinnedProjects
+    ? allProjects.filter((p) => p.tags.includes(filter))
+    : allProjects
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-32 lg:px-8">
