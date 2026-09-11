@@ -23,7 +23,7 @@ export default function FlightProgress() {
       scrub: 0.4,
       onUpdate: (self) => {
         const trackHeight = trackRef.current!.clientHeight
-        const y = self.progress * (trackHeight - 18)
+        const y = self.progress * (trackHeight - 30)
         const wobble = Math.sin(self.progress * Math.PI * 6) * 6
         gsap.set(planeRef.current, { y, x: wobble, rotate: 90 + wobble })
       },
@@ -47,9 +47,9 @@ export default function FlightProgress() {
       aria-hidden="true"
     >
       <div className="absolute left-1/2 h-full w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-sunset-amber/30 to-transparent" />
-      <svg width="24" height="24" viewBox="0 0 24 24" className="absolute left-0 top-0">
+      <svg width="36" height="36" viewBox="0 0 36 36" className="absolute left-1/2 top-0 -translate-x-1/2">
         <g ref={planeRef}>
-          <text x={12} y={17} textAnchor="middle" fontSize={16} fill="#f4b860">
+          <text x={18} y={25} textAnchor="middle" fontSize={24} fill="#f4b860">
             {PLANE_GLYPH}
           </text>
         </g>

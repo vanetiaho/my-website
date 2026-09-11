@@ -79,8 +79,8 @@ export const pinnedProjects: PinnedProject[] = [
 export const music = {
   // Paste any Spotify share link (track, album, or playlist) — open.spotify.com/...
   // It's converted into an embeddable player automatically.
-  featuredSpotifyUrl: 'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M',
-  profileUrl: 'https://open.spotify.com/user/[your-spotify-username]',
+  featuredSpotifyUrl: 'https://open.spotify.com/playlist/4d14FSQi5XrsuuJntZycMC?si=de65551b72ae4468',
+  profileUrl: 'https://open.spotify.com/user/21p66homcn5dj3sbrmdlfhfwq',
   favorites: [
     { title: '[Track One]', artist: '[Artist]', spotifyUrl: '' },
     { title: '[Track Two]', artist: '[Artist]', spotifyUrl: '' },

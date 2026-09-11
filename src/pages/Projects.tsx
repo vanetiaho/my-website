@@ -17,23 +17,45 @@ export default function Projects() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-32 lg:px-8">
-      <p className="section-label mb-3">
-        <span className="mr-1 inline-block align-[-3px] text-base">{PLANE_GLYPH}</span>
+      <motion.p
+        className="section-label mb-3"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <span className="mr-1 inline-block align-[-6px] text-2xl">{PLANE_GLYPH}</span>
         projects.list()
-      </p>
-      <h1 className="mb-10 text-3xl font-bold sm:text-4xl">
+      </motion.p>
+      <motion.h1
+        className="mb-10 text-3xl font-bold sm:text-4xl"
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.08 }}
+      >
         Things I've <span className="text-gradient-sunset">built</span>
-      </h1>
+      </motion.h1>
 
-      <div className="mb-10">
+      <motion.div
+        className="mb-10"
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
         <p className="section-label mb-3">
-          <span className="mr-1 inline-block align-[-3px] text-base">{PLANE_GLYPH}</span>
+          <span className="mr-1 inline-block align-[-6px] text-2xl">{PLANE_GLYPH}</span>
           github.activity
         </p>
         <GithubCalendar />
-      </div>
+      </motion.div>
 
-      <div className="mb-8 flex flex-wrap gap-2">
+      <motion.div
+        className="mb-8 flex flex-wrap gap-2"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4 }}
+      >
         <button
           onClick={() => setFilter(null)}
           className={`interactive rounded-full px-3.5 py-1.5 font-mono text-xs transition-colors ${
@@ -57,7 +79,7 @@ export default function Projects() {
             {tag}
           </button>
         ))}
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((project, i) => (

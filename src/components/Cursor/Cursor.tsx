@@ -82,7 +82,7 @@ export default function Cursor() {
       />
       <div
         ref={planeRef}
-        className="fixed left-0 top-0 text-[30px] leading-none transition-[color] duration-150"
+        className="fixed left-0 top-0 text-[45px] leading-none transition-[color] duration-150"
         style={{
           willChange: 'transform',
           filter: 'drop-shadow(0 0 6px rgba(244,184,96,0.65))',

@@ -11,9 +11,6 @@
   }
   body {
     @apply bg-base-950 text-neutral-200 font-sans;
-    background-image: radial-gradient(circle at 15% -10%, rgba(74, 37, 69, 0.35), transparent 45%),
-      radial-gradient(circle at 85% 0%, rgba(193, 80, 46, 0.18), transparent 40%);
-    background-attachment: fixed;
   }
   h1, h2, h3, h4 {
     @apply font-display tracking-tight;

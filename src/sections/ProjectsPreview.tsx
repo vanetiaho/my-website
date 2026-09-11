@@ -11,7 +11,7 @@ export default function ProjectsPreview() {
       <div className="mb-10 flex items-end justify-between">
         <div>
           <p className="section-label mb-3">
-            <span className="mr-1 inline-block align-[-3px] text-base">{PLANE_GLYPH}</span>
+            <span className="mr-1 inline-block align-[-6px] text-2xl">{PLANE_GLYPH}</span>
             featured.work
           </p>
           <h2 className="text-3xl font-bold sm:text-4xl">

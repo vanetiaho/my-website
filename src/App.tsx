@@ -2,6 +2,7 @@ import { Suspense, lazy, useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import Cursor from './components/Cursor/Cursor'
+import AmbientBackground from './components/AmbientBackground/AmbientBackground'
 import Navbar from './components/Navbar/Navbar'
 import FlightProgress from './components/FlightProgress/FlightProgress'
 import Entrance from './components/Entrance/Entrance'
@@ -37,6 +38,7 @@ export default function App() {
         Skip to content
       </a>
 
+      <AmbientBackground />
       <Cursor />
 
       <AnimatePresence>

@@ -25,6 +25,8 @@ export default {
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
         display: ['"Space Grotesk"', '"JetBrains Mono"', 'ui-monospace', 'sans-serif'],
         sans: ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+        // Just for the hero name — a bolder, more expressive display face.
+        name: ['"Bricolage Grotesque"', '"Space Grotesk"', 'sans-serif'],
       },
       backgroundImage: {
         'sunset-gradient':

@@ -39,7 +39,7 @@ export default function Contact() {
           transition={{ duration: 0.5 }}
         >
           <p className="section-label mb-3">
-            <span className="mr-1 inline-block align-[-3px] text-base">{PLANE_GLYPH}</span>
+            <span className="mr-1 inline-block align-[-6px] text-2xl">{PLANE_GLYPH}</span>
             contact.init()
           </p>
           <h1 className="mb-4 text-3xl font-bold sm:text-4xl">
@@ -71,7 +71,7 @@ export default function Contact() {
         >
           {submitted ? (
             <div className="flex h-full flex-col items-center justify-center py-12 text-center">
-              <div className="mb-3 text-3xl">{PLANE_GLYPH}</div>
+              <div className="mb-3 text-5xl">{PLANE_GLYPH}</div>
               <h2 className="mb-1 text-xl font-semibold">Message sent!</h2>
               <p className="text-neutral-400">Your mail client should be open. Talk soon.</p>
             </div>
@@ -79,7 +79,7 @@ export default function Contact() {
             <form onSubmit={onSubmit} className="space-y-4" noValidate>
               <div>
                 <label htmlFor="name" className="mb-1 block font-mono text-xs text-neutral-400">
-                  <span className="mr-1 inline-block align-[-2px] text-sm">{PLANE_GLYPH}</span>
+                  <span className="mr-1 inline-block align-[-4px] text-xl">{PLANE_GLYPH}</span>
                   name
                 </label>
                 <input
@@ -94,7 +94,7 @@ export default function Contact() {
               </div>
               <div>
                 <label htmlFor="email" className="mb-1 block font-mono text-xs text-neutral-400">
-                  <span className="mr-1 inline-block align-[-2px] text-sm">{PLANE_GLYPH}</span>
+                  <span className="mr-1 inline-block align-[-4px] text-xl">{PLANE_GLYPH}</span>
                   email
                 </label>
                 <input
@@ -110,7 +110,7 @@ export default function Contact() {
               </div>
               <div>
                 <label htmlFor="message" className="mb-1 block font-mono text-xs text-neutral-400">
-                  <span className="mr-1 inline-block align-[-2px] text-sm">{PLANE_GLYPH}</span>
+                  <span className="mr-1 inline-block align-[-4px] text-xl">{PLANE_GLYPH}</span>
                   message
                 </label>
                 <textarea
@@ -139,14 +139,20 @@ export default function Contact() {
         </motion.div>
       </div>
 
-      <footer className="mt-24 flex flex-col items-center gap-3 border-t border-white/10 pt-8 text-center">
+      <motion.footer
+        className="mt-24 flex flex-col items-center gap-3 border-t border-white/10 pt-8 text-center"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
         <p className="font-mono text-xs text-neutral-500">
           {profile.name} {PLANE_GLYPH} {profile.callsign}
         </p>
         <p className="text-xs text-neutral-600">
           Built with a soft spot for golden hour. &copy; {new Date().getFullYear()}
         </p>
-      </footer>
+      </motion.footer>
     </div>
   )
 }

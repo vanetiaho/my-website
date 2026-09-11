@@ -34,7 +34,7 @@ export default function Navbar() {
       >
         <NavLink
           to="/"
-          className="interactive mr-1 hidden select-none items-center px-3 text-lg leading-none text-sunset-gold sm:flex"
+          className="interactive mr-1 hidden select-none items-center px-3 text-2xl leading-none text-sunset-gold sm:flex"
           aria-label="Home"
         >
           <PlaneIcon />

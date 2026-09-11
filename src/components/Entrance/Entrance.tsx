@@ -91,7 +91,7 @@ export default function Entrance({ onDone }: { onDone: () => void }) {
           animate={{ x: 420, y: 70, opacity: [0, 1, 1, 0] }}
           transition={{ duration: 2.2, delay: 0.6, ease: 'easeIn' }}
         >
-          <text x={0} y={20} fontSize={26} fill="#f4e9dd">
+          <text x={0} y={26} fontSize={39} fill="#f4e9dd">
             {PLANE_GLYPH}
           </text>
         </motion.g>

@@ -4,17 +4,23 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 export default function Vinyl({
   spinning,
   onToggle,
+  href,
 }: {
   spinning: boolean
   onToggle: () => void
+  /** Real Spotify track/playlist URL this record links out to. */
+  href: string
 }) {
   const reduced = useReducedMotion()
 
   return (
-    <button
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
       onClick={onToggle}
       className="interactive group relative mx-auto block aspect-square w-full max-w-xs"
-      aria-label={spinning ? 'Pause vinyl' : 'Play vinyl'}
+      aria-label="Open this track on Spotify"
     >
       <motion.div
         className="h-full w-full rounded-full bg-[radial-gradient(circle,#1a1522_0%,#1a1522_18%,#100d14_19%,#100d14_30%,#1a1522_31%,#1a1522_40%,#100d14_41%,#100d14_55%,#1a1522_56%,#1a1522_100%)] shadow-2xl"
@@ -35,9 +41,9 @@ export default function Vinyl({
 
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
         <span className="rounded-full bg-black/50 px-4 py-2 font-mono text-xs text-white">
-          {spinning ? 'Pause' : 'Play'}
+          Open on Spotify ↗
         </span>
       </div>
-    </button>
+    </a>
   )
 }

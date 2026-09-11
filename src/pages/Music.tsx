@@ -12,7 +12,7 @@ export default function Music() {
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-32 lg:px-8">
       <p className="section-label mb-3">
-        <span className="mr-1 inline-block align-[-3px] text-base">{PLANE_GLYPH}</span>
+        <span className="mr-1 inline-block align-[-6px] text-2xl">{PLANE_GLYPH}</span>
         now.playing
       </p>
       <h1 className="mb-10 text-3xl font-bold sm:text-4xl">
@@ -25,9 +25,13 @@ export default function Music() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Vinyl spinning={spinning} onToggle={() => setSpinning((s) => !s)} />
+          <Vinyl
+            spinning={spinning}
+            onToggle={() => setSpinning(true)}
+            href={music.featuredSpotifyUrl}
+          />
           <p className="mt-4 text-center text-sm text-neutral-500">
-            Click the record — playback happens in the Spotify player below.
+            Click the record to open it on Spotify, or listen right here below.
           </p>
 
           {embedUrl ? (
@@ -60,7 +64,7 @@ export default function Music() {
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <h2 className="section-label mb-4">
-            <span className="mr-1 inline-block align-[-3px] text-base">{PLANE_GLYPH}</span>
+            <span className="mr-1 inline-block align-[-6px] text-2xl">{PLANE_GLYPH}</span>
             favorites
           </h2>
           <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 lg:mx-0 lg:grid lg:grid-cols-1 lg:gap-3 lg:overflow-visible lg:px-0">
