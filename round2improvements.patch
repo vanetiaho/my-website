@@ -1,0 +1,998 @@
+From 38295996604db2491f6480962fb4e422b8496e87 Mon Sep 17 00:00:00 2001
+From: vanetiaho <vangs.vanetia@gmail.com>
+Date: Fri, 11 Sep 2026 08:07:09 +0000
+Subject: [PATCH] In-page Spotify playback, aviation-themed GitHub activity,
+ polish pass
+
+- Vinyl now plays the featured Spotify track/playlist directly in-page
+  via Spotify's iFrame Playback API (real play/pause control, spin
+  state driven by actual playback events), instead of just linking out.
+  Falls back to the plain embed iframe, then to an external link, if
+  the API script can't load. Spotify is now a secondary "Open in
+  Spotify" link, not the primary interaction.
+- Removed the underline under the hero name; smoothed the easing on
+  the letter-bounce and full-width plane-flyover hover animation.
+- Fixed the Hero -> About transition: the sunset gradient now hands
+  off into a matching horizon-glow wash at the top of About instead of
+  cutting to black at the section boundary.
+- Replaced the GitHub contribution grid with a custom aviation-themed
+  flight path: a plane continuously flies a route whose waypoints
+  (one per week) glow brighter with more activity, on a dark panel
+  instead of the old beige image fallback. Dropped the image-fallback
+  tier entirely (it was the source of the beige background) in favor
+  of a clean link-out on failure; kept the retry + response-validation
+  reliability logic.
+- Added slow-drifting, scroll-parallaxed cloud haze layers to the
+  site-wide ambient background for more atmosphere, alongside the
+  existing glow blobs and grain.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01ADg6KJ9w2w5ZoasV1Pc5Zq
+---
+ .../AmbientBackground/AmbientBackground.tsx   |  66 +++-
+ .../GithubCalendar/GithubCalendar.tsx         | 293 ++++++++++--------
+ src/components/Vinyl/Vinyl.tsx                |  38 ++-
+ src/lib/spotify.ts                            |  19 ++
+ src/lib/spotifyIframeApi.ts                   |  63 ++++
+ src/pages/Music.tsx                           |  85 ++++-
+ src/sections/About.tsx                        | 118 +++----
+ src/sections/Hero.tsx                         |  23 +-
+ 8 files changed, 473 insertions(+), 232 deletions(-)
+ create mode 100644 src/lib/spotifyIframeApi.ts
+
+diff --git a/src/components/AmbientBackground/AmbientBackground.tsx b/src/components/AmbientBackground/AmbientBackground.tsx
+index d8eec3c..017bcb6 100644
+--- a/src/components/AmbientBackground/AmbientBackground.tsx
++++ b/src/components/AmbientBackground/AmbientBackground.tsx
+@@ -1,4 +1,4 @@
+-import { motion } from 'framer-motion'
++import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion'
+ import { useReducedMotion } from '@/hooks/useReducedMotion'
+ 
+ // A tiny tiled SVG noise texture — adds grain so the dark base never reads as
+@@ -15,6 +15,25 @@ type Blob = {
+   duration: number
+ }
+ 
++type Cloud = {
++  top: string
++  width: string
++  height: string
++  opacity: number
++  duration: number
++  parallax: number
++  reverse?: boolean
++}
++
++// Soft, hazy streaks rather than literal cloud puffs — reads as light passing
++// through high atmosphere, drifting at different speeds for depth, like
++// looking out a plane window at cloud layers below.
++const CLOUDS: Cloud[] = [
++  { top: '8%', width: '55vw', height: '14vw', opacity: 0.05, duration: 85, parallax: 40 },
++  { top: '38%', width: '70vw', height: '10vw', opacity: 0.035, duration: 120, parallax: 90, reverse: true },
++  { top: '68%', width: '46vw', height: '16vw', opacity: 0.045, duration: 100, parallax: 60 },
++]
++
+ const BLOBS: Blob[] = [
+   {
+     className: 'left-[-10%] top-[-10%]',
+@@ -42,11 +61,47 @@ const BLOBS: Blob[] = [
+   },
+ ]
+ 
+-/** Mounted once at the app root: slow drifting glows + film grain so every
+- *  page has quiet depth instead of a flat black canvas. Fixed and inert —
+- *  never intercepts input, never competes with foreground content. */
++/** A single hazy cloud streak, drifting slowly across and shifting with
++ *  scroll depth — layers at different `parallax` speeds read as distance,
++ *  like cloud banks seen through a plane window. */
++function CloudLayer({
++  cloud,
++  scrollY,
++  reduced,
++}: {
++  cloud: Cloud
++  scrollY: MotionValue<number>
++  reduced: boolean
++}) {
++  const y = useTransform(scrollY, (v) => -(v / 1000) * cloud.parallax)
++
++  return (
++    <motion.div
++      className="absolute rounded-[50%] blur-3xl"
++      style={{
++        top: cloud.top,
++        width: cloud.width,
++        height: cloud.height,
++        opacity: cloud.opacity,
++        y: reduced ? 0 : y,
++        background: 'radial-gradient(ellipse, rgba(244,233,221,1) 0%, transparent 72%)',
++      }}
++      initial={{ x: cloud.reverse ? '120%' : '-20%' }}
++      animate={
++        reduced ? undefined : { x: cloud.reverse ? ['120%', '-20%'] : ['-20%', '120%'] }
++      }
++      transition={reduced ? undefined : { duration: cloud.duration, repeat: Infinity, ease: 'linear' }}
++    />
++  )
++}
++
++/** Mounted once at the app root: slow drifting glows, cloud haze, scroll
++ *  parallax and film grain so every page has quiet aviation-flavored depth
++ *  instead of a flat black canvas. Fixed and inert — never intercepts
++ *  input, never competes with foreground content. */
+ export default function AmbientBackground() {
+   const reduced = useReducedMotion()
++  const { scrollY } = useScroll()
+ 
+   return (
+     <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-20 overflow-hidden">
+@@ -73,6 +128,9 @@ export default function AmbientBackground() {
+           }
+         />
+       ))}
++      {CLOUDS.map((cloud, i) => (
++        <CloudLayer key={i} cloud={cloud} scrollY={scrollY} reduced={reduced} />
++      ))}
+       <div
+         className="absolute inset-0 opacity-[0.035] mix-blend-overlay"
+         style={{ backgroundImage: `url("${GRAIN_URL}")`, backgroundSize: '160px 160px' }}
+diff --git a/src/components/GithubCalendar/GithubCalendar.tsx b/src/components/GithubCalendar/GithubCalendar.tsx
+index 594f033..d590032 100644
+--- a/src/components/GithubCalendar/GithubCalendar.tsx
++++ b/src/components/GithubCalendar/GithubCalendar.tsx
+@@ -1,9 +1,12 @@
+-import { useEffect, useState } from 'react'
+-import { motion } from 'framer-motion'
++import { useEffect, useMemo, useRef, useState } from 'react'
++import { useAnimationFrame } from 'framer-motion'
+ import { github } from '@/config/site'
++import { useReducedMotion } from '@/hooks/useReducedMotion'
++import PlaneIcon from '@/components/icons/PlaneIcon'
+ 
+ type Day = { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 }
+-type Status = 'loading' | 'ready' | 'image-fallback' | 'error' | 'unset'
++type Week = { start: string; end: string; total: number; level: 0 | 1 | 2 | 3 | 4 }
++type Status = 'loading' | 'ready' | 'error' | 'unset'
+ 
+ const API_URL = (username: string) =>
+   `https://github-contributions-api.jogruber.de/rest/v1/${username}?y=last`
+@@ -39,38 +42,11 @@ async function fetchContributions(username: string, attempt = 0): Promise<Day[]>
+   }
+ }
+ 
+-// Glass "tiles" — an inset highlight on top + a soft shadow below, amber glow
+-// on the brighter levels so it reads like backlit glass rather than flat pixels.
+-const LEVEL_STYLES = [
+-  {
+-    background: 'rgba(255,255,255,0.05)',
+-    boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -1px 2px rgba(0,0,0,0.25)',
+-  },
+-  {
+-    background: 'linear-gradient(160deg, rgba(74,37,69,0.9), rgba(74,37,69,0.55))',
+-    boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 2px rgba(0,0,0,0.25)',
+-  },
+-  {
+-    background: 'linear-gradient(160deg, rgba(193,80,46,0.95), rgba(193,80,46,0.65))',
+-    boxShadow:
+-      'inset 0 1px 1px rgba(255,255,255,0.2), inset 0 -1px 2px rgba(0,0,0,0.25), 0 0 6px rgba(193,80,46,0.35)',
+-  },
+-  {
+-    background: 'linear-gradient(160deg, #e8934a, #c1682f)',
+-    boxShadow:
+-      'inset 0 1px 1.5px rgba(255,255,255,0.35), inset 0 -1px 2px rgba(0,0,0,0.2), 0 0 8px rgba(232,147,74,0.45)',
+-  },
+-  {
+-    background: 'linear-gradient(160deg, #f9d599, #f4b860)',
+-    boxShadow:
+-      'inset 0 1px 1.5px rgba(255,255,255,0.55), inset 0 -1px 2px rgba(0,0,0,0.15), 0 0 12px rgba(244,184,96,0.65)',
+-  },
+-]
++// Runway-light colors by activity level — dim white through hot amber.
++const LEVEL_COLOR = ['rgba(255,255,255,0.15)', '#7a5a8a', '#c1682f', '#e8934a', '#f9d599']
++const LEVEL_RADIUS = [2.5, 3.5, 4.5, 5.5, 6.5]
+ 
+-const MONTHS = [
+-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+-]
++const DATE_FMT = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
+ 
+ function groupByWeek(days: Day[]): Day[][] {
+   const weeks: Day[][] = []
+@@ -78,9 +54,7 @@ function groupByWeek(days: Day[]): Day[][] {
+   days.forEach((day, i) => {
+     const weekday = new Date(day.date).getUTCDay()
+     if (i === 0) {
+-      for (let pad = 0; pad < weekday; pad++) {
+-        current.push({ date: '', count: 0, level: 0 })
+-      }
++      for (let pad = 0; pad < weekday; pad++) current.push({ date: '', count: 0, level: 0 })
+     }
+     current.push(day)
+     if (weekday === 6) {
+@@ -92,16 +66,129 @@ function groupByWeek(days: Day[]): Day[][] {
+   return weeks
+ }
+ 
+-function monthLabelsFor(weeks: Day[][]): (string | null)[] {
+-  let lastMonth = -1
+-  return weeks.map((week) => {
+-    const firstRealDay = week.find((d) => d.date)
+-    if (!firstRealDay) return null
+-    const month = new Date(firstRealDay.date).getUTCMonth()
+-    if (month === lastMonth) return null
+-    lastMonth = month
+-    return MONTHS[month]
++function toWeeklyTotals(days: Day[]): Week[] {
++  const dayWeeks = groupByWeek(days)
++  const raw = dayWeeks.map((week) => {
++    const real = week.filter((d) => d.date)
++    const total = real.reduce((sum, d) => sum + d.count, 0)
++    return { start: real[0]?.date ?? '', end: real[real.length - 1]?.date ?? '', total }
++  })
++  const max = Math.max(1, ...raw.map((w) => w.total))
++  return raw.map((w) => {
++    const ratio = w.total / max
++    const level: Week['level'] = w.total === 0 ? 0 : ratio > 0.75 ? 4 : ratio > 0.5 ? 3 : ratio > 0.25 ? 2 : 1
++    return { ...w, level }
++  })
++}
++
++const STEP = 26
++const MARGIN = 20
++const HEIGHT = 130
++const BASELINE = 70
++const AMPLITUDE = 22
++const FREQ = 0.018
++
++function waveY(x: number) {
++  return BASELINE + Math.sin(x * FREQ) * AMPLITUDE
++}
++
++function FlightPath({ weeks }: { weeks: Week[] }) {
++  const reduced = useReducedMotion()
++  const planeRef = useRef<SVGGElement>(null)
++  const width = MARGIN * 2 + weeks.length * STEP
++
++  const pathD = useMemo(() => {
++    const points: string[] = []
++    for (let x = 0; x <= width; x += 6) {
++      points.push(`${x === 0 ? 'M' : 'L'} ${x},${waveY(x).toFixed(1)}`)
++    }
++    return points.join(' ')
++  }, [width])
++
++  const markers = useMemo(
++    () =>
++      weeks.map((week, i) => {
++        const x = MARGIN + i * STEP + STEP / 2
++        const y = waveY(x) - week.level * 3.2
++        return { ...week, x, y }
++      }),
++    [weeks]
++  )
++
++  useAnimationFrame((time) => {
++    if (reduced || !planeRef.current) return
++    const LOOP_MS = 16000
++    const t = (time % LOOP_MS) / LOOP_MS
++    const x = t * width
++    const y = waveY(x)
++    const slope = waveY(x + 3) - waveY(x - 3)
++    const angle = Math.atan2(slope, 6) * (180 / Math.PI)
++    planeRef.current.setAttribute('transform', `translate(${x}, ${y}) rotate(${angle})`)
+   })
++
++  return (
++    <svg
++      width={width}
++      height={HEIGHT}
++      viewBox={`0 0 ${width} ${HEIGHT}`}
++      className="block"
++      role="img"
++      aria-label="GitHub contribution flight path, one waypoint per week"
++    >
++      <defs>
++        <linearGradient id="flight-path-line" x1="0" y1="0" x2="1" y2="0">
++          <stop offset="0%" stopColor="#4a2545" />
++          <stop offset="50%" stopColor="#c1502e" />
++          <stop offset="100%" stopColor="#f4b860" />
++        </linearGradient>
++      </defs>
++
++      {/* dashed route line */}
++      <path
++        d={pathD}
++        fill="none"
++        stroke="url(#flight-path-line)"
++        strokeWidth={1.5}
++        strokeDasharray="1 7"
++        strokeLinecap="round"
++        opacity={0.5}
++      />
++
++      {/* activity waypoints */}
++      {markers.map((m, i) => (
++        <g key={i}>
++          {m.level > 0 && (
++            <circle cx={m.x} cy={m.y} r={LEVEL_RADIUS[m.level] + 4} fill={LEVEL_COLOR[m.level]} opacity={0.18} />
++          )}
++          <circle
++            cx={m.x}
++            cy={m.y}
++            r={LEVEL_RADIUS[m.level]}
++            fill={LEVEL_COLOR[m.level]}
++            stroke={m.level > 0 ? 'rgba(255,255,255,0.4)' : 'transparent'}
++            strokeWidth={0.5}
++            className="transition-[r] duration-150 hover:opacity-80"
++          >
++            {m.start && (
++              <title>
++                {m.total} contribution{m.total === 1 ? '' : 's'} · week of {DATE_FMT.format(new Date(m.start))}
++              </title>
++            )}
++          </circle>
++        </g>
++      ))}
++
++      {/* the plane, continuously flying the route */}
++      <g ref={planeRef} transform={`translate(${reduced ? width / 2 : 0}, ${waveY(width / 2)})`}>
++        <circle r={9} fill="rgba(244,184,96,0.25)" />
++        <foreignObject x={-9} y={-9} width="18" height="18">
++          <PlaneIcon
++            className="block text-lg leading-none text-sunset-gold"
++          />
++        </foreignObject>
++      </g>
++    </svg>
++  )
+ }
+ 
+ export default function GithubCalendar() {
+@@ -120,10 +207,7 @@ export default function GithubCalendar() {
+         setStatus('ready')
+       })
+       .catch(() => {
+-        // The JSON API (with a retry already spent) is down or blocked —
+-        // fall back to a plain <img>, which loads without CORS/fetch at all
+-        // and is far less likely to fail the same way.
+-        if (!cancelled) setStatus('image-fallback')
++        if (!cancelled) setStatus('error')
+       })
+ 
+     return () => {
+@@ -131,55 +215,29 @@ export default function GithubCalendar() {
+     }
+   }, [usernameSet])
+ 
++  const panelClass =
++    'rounded-2xl border border-white/10 bg-gradient-to-b from-base-900 to-base-950 p-6'
++  const panelShadow = {
++    boxShadow:
++      'inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -1px 16px rgba(0,0,0,0.4), 0 20px 40px -20px rgba(0,0,0,0.6)',
++  }
++
+   if (status === 'unset') {
+     return (
+-      <div className="glass-panel rounded-2xl p-6 text-sm text-neutral-500">
++      <div className={`${panelClass} text-sm text-neutral-500`} style={panelShadow}>
+         Add your GitHub username to{' '}
+         <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sunset-amber">
+           src/config/site.ts
+         </code>{' '}
+-        to show your live contribution graph here.
+-      </div>
+-    )
+-  }
+-
+-  if (status === 'image-fallback') {
+-    return (
+-      <div
+-        className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-2xl"
+-        style={{
+-          boxShadow:
+-            'inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -1px 12px rgba(0,0,0,0.25), 0 20px 40px -20px rgba(0,0,0,0.5)',
+-        }}
+-      >
+-        <p className="mb-4 font-mono text-sm text-neutral-400">
+-          contributions on <span className="text-sunset-gold">github</span>
+-        </p>
+-        <div className="overflow-x-auto rounded-xl bg-[#f4e9dd] p-3">
+-          <img
+-            src={`https://ghchart.rshah.org/e8934a/${github.username}`}
+-            alt={`${github.username}'s GitHub contribution graph`}
+-            className="min-w-[640px]"
+-            loading="lazy"
+-            onError={() => setStatus('error')}
+-          />
+-        </div>
+-        <a
+-          href={`https://github.com/${github.username}`}
+-          target="_blank"
+-          rel="noopener noreferrer"
+-          className="interactive mt-4 inline-flex items-center gap-1 font-mono text-xs text-neutral-500 hover:text-sunset-gold"
+-        >
+-          View full profile on GitHub ↗
+-        </a>
++        to show your live activity here.
+       </div>
+     )
+   }
+ 
+   if (status === 'error') {
+     return (
+-      <div className="glass-panel rounded-2xl p-6 text-sm text-neutral-500">
+-        Couldn't load the GitHub contribution graph right now.{' '}
++      <div className={`${panelClass} text-sm text-neutral-500`} style={panelShadow}>
++        Couldn't load the flight log right now.{' '}
+         <a
+           href={`https://github.com/${github.username}`}
+           target="_blank"
+@@ -194,66 +252,35 @@ export default function GithubCalendar() {
+ 
+   if (status === 'loading' || !days) {
+     return (
+-      <div className="glass-panel flex h-40 items-center justify-center rounded-2xl">
++      <div className={`${panelClass} flex h-40 items-center justify-center`} style={panelShadow}>
+         <div className="h-6 w-6 animate-spin rounded-full border-2 border-sunset-amber/30 border-t-sunset-amber" />
+       </div>
+     )
+   }
+ 
+-  const weeks = groupByWeek(days)
+-  const monthLabels = monthLabelsFor(weeks)
++  const weeks = toWeeklyTotals(days)
+   const total = days.reduce((sum, d) => sum + d.count, 0)
+ 
+   return (
+-    <div
+-      className="overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-2xl"
+-      style={{
+-        boxShadow:
+-          'inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -1px 12px rgba(0,0,0,0.25), 0 20px 40px -20px rgba(0,0,0,0.5)',
+-      }}
+-    >
+-      <div className="mb-5 flex items-center justify-between">
++    <div className={`${panelClass} overflow-x-auto`} style={panelShadow}>
++      <div className="mb-2 flex items-center justify-between">
+         <p className="font-mono text-sm text-neutral-400">
+-          <span className="text-sunset-gold">{total.toLocaleString()}</span> contributions in
+-          the last year
++          <span className="text-sunset-gold">{total.toLocaleString()}</span> contributions logged
++          this year
+         </p>
+         <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-neutral-500">
+-          <span>less</span>
+-          {LEVEL_STYLES.map((style, i) => (
+-            <span key={i} className="h-2.5 w-2.5 rounded-[3px]" style={style} />
+-          ))}
+-          <span>more</span>
+-        </div>
+-      </div>
+-
+-      <div className="min-w-[640px]">
+-        <div className="mb-1 flex gap-[3px] pl-0 font-mono text-[10px] text-neutral-500">
+-          {monthLabels.map((label, i) => (
+-            <span key={i} className="w-[13px] shrink-0">
+-              {label}
+-            </span>
+-          ))}
+-        </div>
+-        <div className="flex gap-[3px]">
+-          {weeks.map((week, wi) => (
+-            <div key={wi} className="flex flex-col gap-[3px]">
+-              {week.map((day, di) => (
+-                <motion.div
+-                  key={di}
+-                  title={day.date ? `${day.count} contributions on ${day.date}` : undefined}
+-                  className={`h-[13px] w-[13px] rounded-[3px] transition-transform duration-150 ${
+-                    day.date ? 'hover:scale-125' : ''
+-                  }`}
+-                  style={day.date ? LEVEL_STYLES[day.level] : { background: 'transparent' }}
+-                  initial={{ opacity: 0 }}
+-                  animate={{ opacity: 1 }}
+-                  transition={{ duration: 0.25, delay: (wi * 7 + di) * 0.0008 }}
+-                />
+-              ))}
+-            </div>
++          <span>quiet</span>
++          {LEVEL_COLOR.map((color, i) => (
++            <span
++              key={i}
++              className="h-2 w-2 rounded-full"
++              style={{ background: color, boxShadow: i > 1 ? `0 0 6px ${color}` : undefined }}
++            />
+           ))}
++          <span>busy</span>
+         </div>
+       </div>
++      <FlightPath weeks={weeks} />
+     </div>
+   )
+ }
+diff --git a/src/components/Vinyl/Vinyl.tsx b/src/components/Vinyl/Vinyl.tsx
+index 7fb7cea..f2078f6 100644
+--- a/src/components/Vinyl/Vinyl.tsx
++++ b/src/components/Vinyl/Vinyl.tsx
+@@ -4,23 +4,20 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
+ export default function Vinyl({
+   spinning,
+   onToggle,
+-  href,
++  loading,
+ }: {
+   spinning: boolean
+   onToggle: () => void
+-  /** Real Spotify track/playlist URL this record links out to. */
+-  href: string
++  /** Player is still connecting — shown briefly instead of play/pause. */
++  loading?: boolean
+ }) {
+   const reduced = useReducedMotion()
+ 
+   return (
+-    <a
+-      href={href}
+-      target="_blank"
+-      rel="noopener noreferrer"
++    <button
+       onClick={onToggle}
+       className="interactive group relative mx-auto block aspect-square w-full max-w-xs"
+-      aria-label="Open this track on Spotify"
++      aria-label={spinning ? 'Pause' : 'Play'}
+     >
+       <motion.div
+         className="h-full w-full rounded-full bg-[radial-gradient(circle,#1a1522_0%,#1a1522_18%,#100d14_19%,#100d14_30%,#1a1522_31%,#1a1522_40%,#100d14_41%,#100d14_55%,#1a1522_56%,#1a1522_100%)] shadow-2xl"
+@@ -28,7 +25,7 @@ export default function Vinyl({
+         transition={
+           spinning && !reduced
+             ? { repeat: Infinity, ease: 'linear', duration: 3 }
+-            : { duration: 0.3 }
++            : { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
+         }
+       >
+         <div className="absolute left-1/2 top-1/2 h-[34%] w-[34%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-sunset-gradient shadow-glow">
+@@ -39,11 +36,28 @@ export default function Vinyl({
+         <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-base-950" />
+       </motion.div>
+ 
++      {/* Subtle glow that blooms while actually playing */}
++      <motion.div
++        aria-hidden="true"
++        className="pointer-events-none absolute inset-0 rounded-full bg-sunset-radial blur-2xl"
++        animate={{ opacity: spinning ? 0.35 : 0 }}
++        transition={{ duration: 0.6 }}
++      />
++
+       <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+-        <span className="rounded-full bg-black/50 px-4 py-2 font-mono text-xs text-white">
+-          Open on Spotify ↗
++        <span className="flex items-center gap-2 rounded-full bg-black/60 px-4 py-2 font-mono text-xs text-white backdrop-blur-sm">
++          {loading ? (
++            <>
++              <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
++              connecting
++            </>
++          ) : spinning ? (
++            '❙❙ pause'
++          ) : (
++            '▶ play'
++          )}
+         </span>
+       </div>
+-    </a>
++    </button>
+   )
+ }
+diff --git a/src/lib/spotify.ts b/src/lib/spotify.ts
+index bcb08a6..e2923ff 100644
+--- a/src/lib/spotify.ts
++++ b/src/lib/spotify.ts
+@@ -9,3 +9,22 @@ export function toSpotifyEmbedUrl(url: string): string | null {
+     return null
+   }
+ }
++
++const SPOTIFY_URI_TYPES = ['track', 'album', 'playlist', 'episode', 'show', 'artist']
++
++/** Converts any open.spotify.com share URL into a `spotify:type:id` URI, the
++ *  form the Spotify iFrame Playback API needs to drive a controller. Handles
++ *  locale-prefixed paths like /intl-en/track/... too. */
++export function toSpotifyUri(url: string): string | null {
++  try {
++    const parsed = new URL(url)
++    if (!parsed.hostname.includes('open.spotify.com')) return null
++    const segments = parsed.pathname.replace(/^\/+|\/+$/g, '').split('/')
++    const typeIndex = segments.findIndex((s) => SPOTIFY_URI_TYPES.includes(s))
++    const id = typeIndex >= 0 ? segments[typeIndex + 1] : undefined
++    if (typeIndex < 0 || !id) return null
++    return `spotify:${segments[typeIndex]}:${id}`
++  } catch {
++    return null
++  }
++}
+diff --git a/src/lib/spotifyIframeApi.ts b/src/lib/spotifyIframeApi.ts
+new file mode 100644
+index 0000000..7becaa6
+--- /dev/null
++++ b/src/lib/spotifyIframeApi.ts
+@@ -0,0 +1,63 @@
++export type SpotifyPlaybackUpdate = {
++  data: {
++    isPaused: boolean
++    isBuffering: boolean
++    duration: number
++    position: number
++  }
++}
++
++export type SpotifyEmbedController = {
++  play: () => void
++  pause: () => void
++  togglePlay: () => void
++  loadUri: (uri: string) => void
++  addListener: (event: 'ready' | 'playback_update', cb: (e: SpotifyPlaybackUpdate) => void) => void
++  removeListener: (event: string, cb?: (e: SpotifyPlaybackUpdate) => void) => void
++}
++
++type SpotifyIFrameAPI = {
++  createController: (
++    element: HTMLElement,
++    options: { uri: string; width?: string | number; height?: string | number },
++    callback: (controller: SpotifyEmbedController) => void
++  ) => void
++}
++
++declare global {
++  interface Window {
++    onSpotifyIframeApiReady?: (api: SpotifyIFrameAPI) => void
++  }
++}
++
++let apiPromise: Promise<SpotifyIFrameAPI> | null = null
++
++/** Loads Spotify's official embed Playback API once per page load, so a
++ *  standard track/playlist embed can be driven programmatically (play,
++ *  pause, listen for playback state) instead of only linking out. Never
++ *  touches auth/tokens — this is the same public, no-login embed anyone
++ *  gets from a Spotify share link. */
++export function loadSpotifyIframeApi(): Promise<SpotifyIFrameAPI> {
++  if (apiPromise) return apiPromise
++
++  apiPromise = new Promise((resolve, reject) => {
++    const previousReady = window.onSpotifyIframeApiReady
++    window.onSpotifyIframeApiReady = (api) => {
++      previousReady?.(api)
++      resolve(api)
++    }
++
++    if (!document.querySelector('script[data-spotify-iframe-api]')) {
++      const script = document.createElement('script')
++      script.src = 'https://open.spotify.com/embed/iframe-api/v1'
++      script.async = true
++      script.dataset.spotifyIframeApi = 'true'
++      script.onerror = () => reject(new Error('Failed to load the Spotify embed API'))
++      document.body.appendChild(script)
++    }
++
++    window.setTimeout(() => reject(new Error('Spotify embed API timed out')), 8000)
++  })
++
++  return apiPromise
++}
+diff --git a/src/pages/Music.tsx b/src/pages/Music.tsx
+index dc46a25..3ecc1aa 100644
+--- a/src/pages/Music.tsx
++++ b/src/pages/Music.tsx
+@@ -1,13 +1,56 @@
+-import { useState } from 'react'
++import { useEffect, useRef, useState } from 'react'
+ import { motion } from 'framer-motion'
+ import { music } from '@/config/site'
+ import Vinyl from '@/components/Vinyl/Vinyl'
+-import { toSpotifyEmbedUrl } from '@/lib/spotify'
++import { toSpotifyEmbedUrl, toSpotifyUri } from '@/lib/spotify'
++import { loadSpotifyIframeApi, type SpotifyEmbedController } from '@/lib/spotifyIframeApi'
+ import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+ 
+ export default function Music() {
+-  const [spinning, setSpinning] = useState(false)
++  const uri = toSpotifyUri(music.featuredSpotifyUrl)
+   const embedUrl = toSpotifyEmbedUrl(music.featuredSpotifyUrl)
++  const containerRef = useRef<HTMLDivElement>(null)
++  const controllerRef = useRef<SpotifyEmbedController | null>(null)
++  const [playerReady, setPlayerReady] = useState(false)
++  const [apiFailed, setApiFailed] = useState(false)
++  const [isPlaying, setIsPlaying] = useState(false)
++
++  useEffect(() => {
++    if (!uri || !containerRef.current) return
++    let cancelled = false
++
++    loadSpotifyIframeApi()
++      .then((IFrameAPI) => {
++        if (cancelled || !containerRef.current) return
++        IFrameAPI.createController(
++          containerRef.current,
++          { uri, width: '100%', height: 352 },
++          (controller) => {
++            if (cancelled) return
++            controllerRef.current = controller
++            setPlayerReady(true)
++            controller.addListener('playback_update', (e) => {
++              setIsPlaying(!e.data.isPaused)
++            })
++          }
++        )
++      })
++      .catch(() => {
++        if (!cancelled) setApiFailed(true)
++      })
++
++    return () => {
++      cancelled = true
++    }
++  }, [uri])
++
++  const handleVinylToggle = () => {
++    if (controllerRef.current) {
++      controllerRef.current.togglePlay()
++    } else {
++      window.open(music.featuredSpotifyUrl, '_blank', 'noopener,noreferrer')
++    }
++  }
+ 
+   return (
+     <div className="mx-auto max-w-6xl px-6 pb-24 pt-32 lg:px-8">
+@@ -25,16 +68,28 @@ export default function Music() {
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.5 }}
+         >
+-          <Vinyl
+-            spinning={spinning}
+-            onToggle={() => setSpinning(true)}
+-            href={music.featuredSpotifyUrl}
+-          />
+-          <p className="mt-4 text-center text-sm text-neutral-500">
+-            Click the record to open it on Spotify, or listen right here below.
+-          </p>
++          <Vinyl spinning={isPlaying} onToggle={handleVinylToggle} loading={!!uri && !playerReady && !apiFailed} />
++          <div className="mt-4 flex flex-col items-center gap-1.5 text-center">
++            <p className="text-sm text-neutral-500">
++              {uri
++                ? 'Click the record to play or pause, right here.'
++                : 'Add a Spotify link to play a track right here.'}
++            </p>
++            <a
++              href={music.featuredSpotifyUrl}
++              target="_blank"
++              rel="noopener noreferrer"
++              className="interactive font-mono text-xs text-neutral-600 hover:text-sunset-gold"
++            >
++              Open in Spotify ↗
++            </a>
++          </div>
+ 
+-          {embedUrl ? (
++          {uri && !apiFailed && (
++            <div ref={containerRef} className="mt-8 w-full overflow-hidden rounded-2xl" />
++          )}
++
++          {uri && apiFailed && embedUrl && (
+             <iframe
+               className="mt-8 w-full rounded-2xl"
+               src={embedUrl}
+@@ -46,14 +101,16 @@ export default function Music() {
+               loading="lazy"
+               title="Spotify player"
+             />
+-          ) : (
++          )}
++
++          {!uri && (
+             <div className="glass-panel mt-8 rounded-2xl p-6 text-sm text-neutral-500">
+               Add a Spotify track, album, or playlist share link to{' '}
+               <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sunset-amber">
+                 music.featuredSpotifyUrl
+               </code>{' '}
+               in <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono">src/config/site.ts</code>{' '}
+-              to embed the real player here.
++              to play the real thing here.
+             </div>
+           )}
+         </motion.div>
+diff --git a/src/sections/About.tsx b/src/sections/About.tsx
+index e5e760c..c26534e 100644
+--- a/src/sections/About.tsx
++++ b/src/sections/About.tsx
+@@ -4,64 +4,76 @@ import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
+ 
+ export default function About() {
+   return (
+-    <section id="about" className="mx-auto max-w-6xl px-6 py-24 lg:px-8">
+-      <motion.p
+-        className="section-label mb-3"
+-        initial={{ opacity: 0 }}
+-        whileInView={{ opacity: 1 }}
+-        viewport={{ once: true }}
+-      >
+-        <span className="mr-1 inline-block align-[-6px] text-2xl">{PLANE_GLYPH}</span>
+-        about.me
+-      </motion.p>
+-      <motion.h2
+-        className="mb-10 text-3xl font-bold sm:text-4xl"
+-        initial={{ opacity: 0, y: 12 }}
+-        whileInView={{ opacity: 1, y: 0 }}
+-        viewport={{ once: true }}
+-      >
+-        Flying steady since <span className="text-gradient-sunset">day one</span>
+-      </motion.h2>
+-
+-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-5">
+-        <motion.div
+-          className="lg:col-span-2"
+-          initial={{ opacity: 0, x: -16 }}
+-          whileInView={{ opacity: 1, x: 0 }}
++    <section id="about" className="relative overflow-hidden px-6 py-24 lg:px-8">
++      {/* Picks up exactly where Hero's sunset fades out, so the seam between
++          sections reads as one continuous glow rather than a hard cut. */}
++      <div
++        aria-hidden="true"
++        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[60vh] bg-horizon-glow opacity-80"
++        style={{
++          maskImage: 'linear-gradient(to bottom, black 0%, transparent 85%)',
++          WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 85%)',
++        }}
++      />
++      <div className="mx-auto max-w-6xl">
++        <motion.p
++          className="section-label mb-3"
++          initial={{ opacity: 0 }}
++          whileInView={{ opacity: 1 }}
+           viewport={{ once: true }}
+-          transition={{ duration: 0.6 }}
+         >
+-          <p className="whitespace-pre-line text-neutral-400">{profile.bio}</p>
+-          <p className="mt-4 font-mono text-sm text-neutral-500">
+-            📍 {profile.location}
+-          </p>
+-        </motion.div>
+-
+-        <motion.div
+-          className="glass-panel rounded-2xl p-6 lg:col-span-3"
+-          initial={{ opacity: 0, y: 16 }}
++          <span className="mr-1 inline-block align-[-6px] text-2xl">{PLANE_GLYPH}</span>
++          about.me
++        </motion.p>
++        <motion.h2
++          className="mb-10 text-3xl font-bold sm:text-4xl"
++          initial={{ opacity: 0, y: 12 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true }}
+-          transition={{ duration: 0.5 }}
+         >
+-          <h3 className="mb-4 font-mono text-sm uppercase tracking-wide text-sunset-amber">
+-            What I work with
+-          </h3>
+-          <div className="flex flex-wrap gap-2">
+-            {skills.map((skill, i) => (
+-              <motion.span
+-                key={skill}
+-                className="rounded-full bg-white/5 px-3.5 py-1.5 text-sm text-neutral-200"
+-                initial={{ opacity: 0, y: 8 }}
+-                whileInView={{ opacity: 1, y: 0 }}
+-                viewport={{ once: true }}
+-                transition={{ duration: 0.3, delay: i * 0.04 }}
+-              >
+-                {skill}
+-              </motion.span>
+-            ))}
+-          </div>
+-        </motion.div>
++          Flying steady since <span className="text-gradient-sunset">day one</span>
++        </motion.h2>
++
++        <div className="grid grid-cols-1 gap-12 lg:grid-cols-5">
++          <motion.div
++            className="lg:col-span-2"
++            initial={{ opacity: 0, x: -16 }}
++            whileInView={{ opacity: 1, x: 0 }}
++            viewport={{ once: true }}
++            transition={{ duration: 0.6 }}
++          >
++            <p className="whitespace-pre-line text-neutral-400">{profile.bio}</p>
++            <p className="mt-4 font-mono text-sm text-neutral-500">
++              📍 {profile.location}
++            </p>
++          </motion.div>
++
++          <motion.div
++            className="glass-panel rounded-2xl p-6 lg:col-span-3"
++            initial={{ opacity: 0, y: 16 }}
++            whileInView={{ opacity: 1, y: 0 }}
++            viewport={{ once: true }}
++            transition={{ duration: 0.5 }}
++          >
++            <h3 className="mb-4 font-mono text-sm uppercase tracking-wide text-sunset-amber">
++              What I work with
++            </h3>
++            <div className="flex flex-wrap gap-2">
++              {skills.map((skill, i) => (
++                <motion.span
++                  key={skill}
++                  className="rounded-full bg-white/5 px-3.5 py-1.5 text-sm text-neutral-200"
++                  initial={{ opacity: 0, y: 8 }}
++                  whileInView={{ opacity: 1, y: 0 }}
++                  viewport={{ once: true }}
++                  transition={{ duration: 0.3, delay: i * 0.04 }}
++                >
++                  {skill}
++                </motion.span>
++              ))}
++            </div>
++          </motion.div>
++        </div>
+       </div>
+     </section>
+   )
+diff --git a/src/sections/Hero.tsx b/src/sections/Hero.tsx
+index ade6c70..257e2dd 100644
+--- a/src/sections/Hero.tsx
++++ b/src/sections/Hero.tsx
+@@ -60,10 +60,10 @@ export default function Hero() {
+                       hover: reduced
+                         ? { color: '#f4b860', transition: { duration: 0.3, delay: i * 0.02 } }
+                         : {
+-                            y: [0, -26, 0],
+-                            scale: [1, 1.12, 1],
++                            y: [0, -18, 0],
++                            scale: [1, 1.08, 1],
+                             color: ['#ffffff', '#f4b860', '#ffffff'],
+-                            transition: { duration: 0.6, delay: i * 0.035, ease: 'easeInOut' },
++                            transition: { duration: 0.55, delay: i * 0.032, ease: [0.22, 1, 0.36, 1] },
+                           },
+                     }}
+                   >
+@@ -72,16 +72,6 @@ export default function Hero() {
+                 ))}
+               </motion.span>
+ 
+-              {/* Contrail the plane draws as it crosses */}
+-              <motion.span
+-                aria-hidden="true"
+-                className="absolute -bottom-2 left-0 h-[3px] w-full origin-left rounded-full bg-gradient-to-r from-sunset-gold via-sunset-amber to-sunset-burnt"
+-                variants={{
+-                  rest: { scaleX: 0, opacity: 0 },
+-                  hover: { scaleX: 1, opacity: 1, transition: { duration: 0.7, ease: 'easeOut', delay: 0.05 } },
+-                }}
+-              />
+-
+               {/* Plane flying across the full name — the wrapper is w-full so the
+                   percentage x-transform resolves against the name's actual
+                   width, not the icon's own tiny box */}
+@@ -95,17 +85,18 @@ export default function Hero() {
+                     : {
+                         x: ['-6%', '100%'],
+                         opacity: [0, 1, 1, 1, 0],
+-                        transition: { duration: 1.1, ease: 'easeInOut' },
++                        transition: { duration: 1, ease: [0.65, 0, 0.35, 1] },
+                       },
+                 }}
+               >
+                 <motion.span
+                   className="absolute left-0 top-0 inline-block -translate-x-1/2 text-sunset-gold"
++                  style={{ filter: 'drop-shadow(0 2px 6px rgba(244,184,96,0.5))' }}
+                   variants={{
+                     rest: { rotate: 0 },
+                     hover: {
+-                      rotate: [-4, 6, -3, 4, 0],
+-                      transition: { duration: 1.1, ease: 'easeInOut' },
++                      rotate: [-3, 4, -2, 3, 0],
++                      transition: { duration: 1, ease: [0.65, 0, 0.35, 1] },
+                     },
+                   }}
+                 >
+-- 
+2.43.0
+

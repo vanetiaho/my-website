@@ -60,10 +60,10 @@ export default function Hero() {
                       hover: reduced
                         ? { color: '#f4b860', transition: { duration: 0.3, delay: i * 0.02 } }
                         : {
-                            y: [0, -26, 0],
-                            scale: [1, 1.12, 1],
+                            y: [0, -18, 0],
+                            scale: [1, 1.08, 1],
                             color: ['#ffffff', '#f4b860', '#ffffff'],
-                            transition: { duration: 0.6, delay: i * 0.035, ease: 'easeInOut' },
+                            transition: { duration: 0.55, delay: i * 0.032, ease: [0.22, 1, 0.36, 1] },
                           },
                     }}
                   >
@@ -71,16 +71,6 @@ export default function Hero() {
                   </motion.span>
                 ))}
               </motion.span>
-
-              {/* Contrail the plane draws as it crosses */}
-              <motion.span
-                aria-hidden="true"
-                className="absolute -bottom-2 left-0 h-[3px] w-full origin-left rounded-full bg-gradient-to-r from-sunset-gold via-sunset-amber to-sunset-burnt"
-                variants={{
-                  rest: { scaleX: 0, opacity: 0 },
-                  hover: { scaleX: 1, opacity: 1, transition: { duration: 0.7, ease: 'easeOut', delay: 0.05 } },
-                }}
-              />
 
               {/* Plane flying across the full name — the wrapper is w-full so the
                   percentage x-transform resolves against the name's actual
@@ -95,17 +85,18 @@ export default function Hero() {
                     : {
                         x: ['-6%', '100%'],
                         opacity: [0, 1, 1, 1, 0],
-                        transition: { duration: 1.1, ease: 'easeInOut' },
+                        transition: { duration: 1, ease: [0.65, 0, 0.35, 1] },
                       },
                 }}
               >
                 <motion.span
                   className="absolute left-0 top-0 inline-block -translate-x-1/2 text-sunset-gold"
+                  style={{ filter: 'drop-shadow(0 2px 6px rgba(244,184,96,0.5))' }}
                   variants={{
                     rest: { rotate: 0 },
                     hover: {
-                      rotate: [-4, 6, -3, 4, 0],
-                      transition: { duration: 1.1, ease: 'easeInOut' },
+                      rotate: [-3, 4, -2, 3, 0],
+                      transition: { duration: 1, ease: [0.65, 0, 0.35, 1] },
                     },
                   }}
                 >

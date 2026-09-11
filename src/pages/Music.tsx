@@ -1,13 +1,56 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { music } from '@/config/site'
 import Vinyl from '@/components/Vinyl/Vinyl'
-import { toSpotifyEmbedUrl } from '@/lib/spotify'
+import { toSpotifyEmbedUrl, toSpotifyUri } from '@/lib/spotify'
+import { loadSpotifyIframeApi, type SpotifyEmbedController } from '@/lib/spotifyIframeApi'
 import { PLANE_GLYPH } from '@/components/icons/PlaneIcon'
 
 export default function Music() {
-  const [spinning, setSpinning] = useState(false)
+  const uri = toSpotifyUri(music.featuredSpotifyUrl)
   const embedUrl = toSpotifyEmbedUrl(music.featuredSpotifyUrl)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const controllerRef = useRef<SpotifyEmbedController | null>(null)
+  const [playerReady, setPlayerReady] = useState(false)
+  const [apiFailed, setApiFailed] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  useEffect(() => {
+    if (!uri || !containerRef.current) return
+    let cancelled = false
+
+    loadSpotifyIframeApi()
+      .then((IFrameAPI) => {
+        if (cancelled || !containerRef.current) return
+        IFrameAPI.createController(
+          containerRef.current,
+          { uri, width: '100%', height: 352 },
+          (controller) => {
+            if (cancelled) return
+            controllerRef.current = controller
+            setPlayerReady(true)
+            controller.addListener('playback_update', (e) => {
+              setIsPlaying(!e.data.isPaused)
+            })
+          }
+        )
+      })
+      .catch(() => {
+        if (!cancelled) setApiFailed(true)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [uri])
+
+  const handleVinylToggle = () => {
+    if (controllerRef.current) {
+      controllerRef.current.togglePlay()
+    } else {
+      window.open(music.featuredSpotifyUrl, '_blank', 'noopener,noreferrer')
+    }
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-32 lg:px-8">
@@ -25,16 +68,28 @@ export default function Music() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Vinyl
-            spinning={spinning}
-            onToggle={() => setSpinning(true)}
-            href={music.featuredSpotifyUrl}
-          />
-          <p className="mt-4 text-center text-sm text-neutral-500">
-            Click the record to open it on Spotify, or listen right here below.
-          </p>
+          <Vinyl spinning={isPlaying} onToggle={handleVinylToggle} loading={!!uri && !playerReady && !apiFailed} />
+          <div className="mt-4 flex flex-col items-center gap-1.5 text-center">
+            <p className="text-sm text-neutral-500">
+              {uri
+                ? 'Click the record to play or pause, right here.'
+                : 'Add a Spotify link to play a track right here.'}
+            </p>
+            <a
+              href={music.featuredSpotifyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="interactive font-mono text-xs text-neutral-600 hover:text-sunset-gold"
+            >
+              Open in Spotify ↗
+            </a>
+          </div>
 
-          {embedUrl ? (
+          {uri && !apiFailed && (
+            <div ref={containerRef} className="mt-8 w-full overflow-hidden rounded-2xl" />
+          )}
+
+          {uri && apiFailed && embedUrl && (
             <iframe
               className="mt-8 w-full rounded-2xl"
               src={embedUrl}
@@ -46,14 +101,16 @@ export default function Music() {
               loading="lazy"
               title="Spotify player"
             />
-          ) : (
+          )}
+
+          {!uri && (
             <div className="glass-panel mt-8 rounded-2xl p-6 text-sm text-neutral-500">
               Add a Spotify track, album, or playlist share link to{' '}
               <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sunset-amber">
                 music.featuredSpotifyUrl
               </code>{' '}
               in <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono">src/config/site.ts</code>{' '}
-              to embed the real player here.
+              to play the real thing here.
             </div>
           )}
         </motion.div>

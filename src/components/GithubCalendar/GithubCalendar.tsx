@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useAnimationFrame } from 'framer-motion'
 import { github } from '@/config/site'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+import PlaneIcon from '@/components/icons/PlaneIcon'
 
 type Day = { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 }
-type Status = 'loading' | 'ready' | 'image-fallback' | 'error' | 'unset'
+type Week = { start: string; end: string; total: number; level: 0 | 1 | 2 | 3 | 4 }
+type Status = 'loading' | 'ready' | 'error' | 'unset'
 
 const API_URL = (username: string) =>
   `https://github-contributions-api.jogruber.de/rest/v1/${username}?y=last`
@@ -39,38 +42,11 @@ async function fetchContributions(username: string, attempt = 0): Promise<Day[]>
   }
 }
 
-// Glass "tiles" — an inset highlight on top + a soft shadow below, amber glow
-// on the brighter levels so it reads like backlit glass rather than flat pixels.
-const LEVEL_STYLES = [
-  {
-    background: 'rgba(255,255,255,0.05)',
-    boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -1px 2px rgba(0,0,0,0.25)',
-  },
-  {
-    background: 'linear-gradient(160deg, rgba(74,37,69,0.9), rgba(74,37,69,0.55))',
-    boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 2px rgba(0,0,0,0.25)',
-  },
-  {
-    background: 'linear-gradient(160deg, rgba(193,80,46,0.95), rgba(193,80,46,0.65))',
-    boxShadow:
-      'inset 0 1px 1px rgba(255,255,255,0.2), inset 0 -1px 2px rgba(0,0,0,0.25), 0 0 6px rgba(193,80,46,0.35)',
-  },
-  {
-    background: 'linear-gradient(160deg, #e8934a, #c1682f)',
-    boxShadow:
-      'inset 0 1px 1.5px rgba(255,255,255,0.35), inset 0 -1px 2px rgba(0,0,0,0.2), 0 0 8px rgba(232,147,74,0.45)',
-  },
-  {
-    background: 'linear-gradient(160deg, #f9d599, #f4b860)',
-    boxShadow:
-      'inset 0 1px 1.5px rgba(255,255,255,0.55), inset 0 -1px 2px rgba(0,0,0,0.15), 0 0 12px rgba(244,184,96,0.65)',
-  },
-]
+// Runway-light colors by activity level — dim white through hot amber.
+const LEVEL_COLOR = ['rgba(255,255,255,0.15)', '#7a5a8a', '#c1682f', '#e8934a', '#f9d599']
+const LEVEL_RADIUS = [2.5, 3.5, 4.5, 5.5, 6.5]
 
-const MONTHS = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-]
+const DATE_FMT = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
 
 function groupByWeek(days: Day[]): Day[][] {
   const weeks: Day[][] = []
@@ -78,9 +54,7 @@ function groupByWeek(days: Day[]): Day[][] {
   days.forEach((day, i) => {
     const weekday = new Date(day.date).getUTCDay()
     if (i === 0) {
-      for (let pad = 0; pad < weekday; pad++) {
-        current.push({ date: '', count: 0, level: 0 })
-      }
+      for (let pad = 0; pad < weekday; pad++) current.push({ date: '', count: 0, level: 0 })
     }
     current.push(day)
     if (weekday === 6) {
@@ -92,16 +66,129 @@ function groupByWeek(days: Day[]): Day[][] {
   return weeks
 }
 
-function monthLabelsFor(weeks: Day[][]): (string | null)[] {
-  let lastMonth = -1
-  return weeks.map((week) => {
-    const firstRealDay = week.find((d) => d.date)
-    if (!firstRealDay) return null
-    const month = new Date(firstRealDay.date).getUTCMonth()
-    if (month === lastMonth) return null
-    lastMonth = month
-    return MONTHS[month]
+function toWeeklyTotals(days: Day[]): Week[] {
+  const dayWeeks = groupByWeek(days)
+  const raw = dayWeeks.map((week) => {
+    const real = week.filter((d) => d.date)
+    const total = real.reduce((sum, d) => sum + d.count, 0)
+    return { start: real[0]?.date ?? '', end: real[real.length - 1]?.date ?? '', total }
   })
+  const max = Math.max(1, ...raw.map((w) => w.total))
+  return raw.map((w) => {
+    const ratio = w.total / max
+    const level: Week['level'] = w.total === 0 ? 0 : ratio > 0.75 ? 4 : ratio > 0.5 ? 3 : ratio > 0.25 ? 2 : 1
+    return { ...w, level }
+  })
+}
+
+const STEP = 26
+const MARGIN = 20
+const HEIGHT = 130
+const BASELINE = 70
+const AMPLITUDE = 22
+const FREQ = 0.018
+
+function waveY(x: number) {
+  return BASELINE + Math.sin(x * FREQ) * AMPLITUDE
+}
+
+function FlightPath({ weeks }: { weeks: Week[] }) {
+  const reduced = useReducedMotion()
+  const planeRef = useRef<SVGGElement>(null)
+  const width = MARGIN * 2 + weeks.length * STEP
+
+  const pathD = useMemo(() => {
+    const points: string[] = []
+    for (let x = 0; x <= width; x += 6) {
+      points.push(`${x === 0 ? 'M' : 'L'} ${x},${waveY(x).toFixed(1)}`)
+    }
+    return points.join(' ')
+  }, [width])
+
+  const markers = useMemo(
+    () =>
+      weeks.map((week, i) => {
+        const x = MARGIN + i * STEP + STEP / 2
+        const y = waveY(x) - week.level * 3.2
+        return { ...week, x, y }
+      }),
+    [weeks]
+  )
+
+  useAnimationFrame((time) => {
+    if (reduced || !planeRef.current) return
+    const LOOP_MS = 16000
+    const t = (time % LOOP_MS) / LOOP_MS
+    const x = t * width
+    const y = waveY(x)
+    const slope = waveY(x + 3) - waveY(x - 3)
+    const angle = Math.atan2(slope, 6) * (180 / Math.PI)
+    planeRef.current.setAttribute('transform', `translate(${x}, ${y}) rotate(${angle})`)
+  })
+
+  return (
+    <svg
+      width={width}
+      height={HEIGHT}
+      viewBox={`0 0 ${width} ${HEIGHT}`}
+      className="block"
+      role="img"
+      aria-label="GitHub contribution flight path, one waypoint per week"
+    >
+      <defs>
+        <linearGradient id="flight-path-line" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#4a2545" />
+          <stop offset="50%" stopColor="#c1502e" />
+          <stop offset="100%" stopColor="#f4b860" />
+        </linearGradient>
+      </defs>
+
+      {/* dashed route line */}
+      <path
+        d={pathD}
+        fill="none"
+        stroke="url(#flight-path-line)"
+        strokeWidth={1.5}
+        strokeDasharray="1 7"
+        strokeLinecap="round"
+        opacity={0.5}
+      />
+
+      {/* activity waypoints */}
+      {markers.map((m, i) => (
+        <g key={i}>
+          {m.level > 0 && (
+            <circle cx={m.x} cy={m.y} r={LEVEL_RADIUS[m.level] + 4} fill={LEVEL_COLOR[m.level]} opacity={0.18} />
+          )}
+          <circle
+            cx={m.x}
+            cy={m.y}
+            r={LEVEL_RADIUS[m.level]}
+            fill={LEVEL_COLOR[m.level]}
+            stroke={m.level > 0 ? 'rgba(255,255,255,0.4)' : 'transparent'}
+            strokeWidth={0.5}
+            className="transition-[r] duration-150 hover:opacity-80"
+          >
+            {m.start && (
+              <title>
+                {m.total} contribution{m.total === 1 ? '' : 's'} · week of {DATE_FMT.format(new Date(m.start))}
+              </title>
+            )}
+          </circle>
+        </g>
+      ))}
+
+      {/* the plane, continuously flying the route */}
+      <g ref={planeRef} transform={`translate(${reduced ? width / 2 : 0}, ${waveY(width / 2)})`}>
+        <circle r={9} fill="rgba(244,184,96,0.25)" />
+        <foreignObject x={-9} y={-9} width="18" height="18">
+          <PlaneIcon
+            className="block text-lg leading-none text-sunset-gold"
+          />
+        </foreignObject>
+      </g>
+    </svg>
+  )
 }
 
 export default function GithubCalendar() {
@@ -120,10 +207,7 @@ export default function GithubCalendar() {
         setStatus('ready')
       })
       .catch(() => {
-        // The JSON API (with a retry already spent) is down or blocked —
-        // fall back to a plain <img>, which loads without CORS/fetch at all
-        // and is far less likely to fail the same way.
-        if (!cancelled) setStatus('image-fallback')
+        if (!cancelled) setStatus('error')
       })
 
     return () => {
@@ -131,55 +215,29 @@ export default function GithubCalendar() {
     }
   }, [usernameSet])
 
+  const panelClass =
+    'rounded-2xl border border-white/10 bg-gradient-to-b from-base-900 to-base-950 p-6'
+  const panelShadow = {
+    boxShadow:
+      'inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -1px 16px rgba(0,0,0,0.4), 0 20px 40px -20px rgba(0,0,0,0.6)',
+  }
+
   if (status === 'unset') {
     return (
-      <div className="glass-panel rounded-2xl p-6 text-sm text-neutral-500">
+      <div className={`${panelClass} text-sm text-neutral-500`} style={panelShadow}>
         Add your GitHub username to{' '}
         <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sunset-amber">
           src/config/site.ts
         </code>{' '}
-        to show your live contribution graph here.
-      </div>
-    )
-  }
-
-  if (status === 'image-fallback') {
-    return (
-      <div
-        className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-2xl"
-        style={{
-          boxShadow:
-            'inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -1px 12px rgba(0,0,0,0.25), 0 20px 40px -20px rgba(0,0,0,0.5)',
-        }}
-      >
-        <p className="mb-4 font-mono text-sm text-neutral-400">
-          contributions on <span className="text-sunset-gold">github</span>
-        </p>
-        <div className="overflow-x-auto rounded-xl bg-[#f4e9dd] p-3">
-          <img
-            src={`https://ghchart.rshah.org/e8934a/${github.username}`}
-            alt={`${github.username}'s GitHub contribution graph`}
-            className="min-w-[640px]"
-            loading="lazy"
-            onError={() => setStatus('error')}
-          />
-        </div>
-        <a
-          href={`https://github.com/${github.username}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="interactive mt-4 inline-flex items-center gap-1 font-mono text-xs text-neutral-500 hover:text-sunset-gold"
-        >
-          View full profile on GitHub ↗
-        </a>
+        to show your live activity here.
       </div>
     )
   }
 
   if (status === 'error') {
     return (
-      <div className="glass-panel rounded-2xl p-6 text-sm text-neutral-500">
-        Couldn't load the GitHub contribution graph right now.{' '}
+      <div className={`${panelClass} text-sm text-neutral-500`} style={panelShadow}>
+        Couldn't load the flight log right now.{' '}
         <a
           href={`https://github.com/${github.username}`}
           target="_blank"
@@ -194,66 +252,35 @@ export default function GithubCalendar() {
 
   if (status === 'loading' || !days) {
     return (
-      <div className="glass-panel flex h-40 items-center justify-center rounded-2xl">
+      <div className={`${panelClass} flex h-40 items-center justify-center`} style={panelShadow}>
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-sunset-amber/30 border-t-sunset-amber" />
       </div>
     )
   }
 
-  const weeks = groupByWeek(days)
-  const monthLabels = monthLabelsFor(weeks)
+  const weeks = toWeeklyTotals(days)
   const total = days.reduce((sum, d) => sum + d.count, 0)
 
   return (
-    <div
-      className="overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-2xl"
-      style={{
-        boxShadow:
-          'inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -1px 12px rgba(0,0,0,0.25), 0 20px 40px -20px rgba(0,0,0,0.5)',
-      }}
-    >
-      <div className="mb-5 flex items-center justify-between">
+    <div className={`${panelClass} overflow-x-auto`} style={panelShadow}>
+      <div className="mb-2 flex items-center justify-between">
         <p className="font-mono text-sm text-neutral-400">
-          <span className="text-sunset-gold">{total.toLocaleString()}</span> contributions in
-          the last year
+          <span className="text-sunset-gold">{total.toLocaleString()}</span> contributions logged
+          this year
         </p>
         <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-neutral-500">
-          <span>less</span>
-          {LEVEL_STYLES.map((style, i) => (
-            <span key={i} className="h-2.5 w-2.5 rounded-[3px]" style={style} />
+          <span>quiet</span>
+          {LEVEL_COLOR.map((color, i) => (
+            <span
+              key={i}
+              className="h-2 w-2 rounded-full"
+              style={{ background: color, boxShadow: i > 1 ? `0 0 6px ${color}` : undefined }}
+            />
           ))}
-          <span>more</span>
+          <span>busy</span>
         </div>
       </div>
-
-      <div className="min-w-[640px]">
-        <div className="mb-1 flex gap-[3px] pl-0 font-mono text-[10px] text-neutral-500">
-          {monthLabels.map((label, i) => (
-            <span key={i} className="w-[13px] shrink-0">
-              {label}
-            </span>
-          ))}
-        </div>
-        <div className="flex gap-[3px]">
-          {weeks.map((week, wi) => (
-            <div key={wi} className="flex flex-col gap-[3px]">
-              {week.map((day, di) => (
-                <motion.div
-                  key={di}
-                  title={day.date ? `${day.count} contributions on ${day.date}` : undefined}
-                  className={`h-[13px] w-[13px] rounded-[3px] transition-transform duration-150 ${
-                    day.date ? 'hover:scale-125' : ''
-                  }`}
-                  style={day.date ? LEVEL_STYLES[day.level] : { background: 'transparent' }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.25, delay: (wi * 7 + di) * 0.0008 }}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+      <FlightPath weeks={weeks} />
     </div>
   )
 }
