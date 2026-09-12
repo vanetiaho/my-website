@@ -8,7 +8,7 @@ export default defineConfig({
   // Vercel/Netlify serve from the domain root, so default base is '/'.
   // Deploying to GitHub Pages under a repo subpath? Set VITE_BASE_PATH, e.g.
   // VITE_BASE_PATH=/my-website/ npm run build
-  base: process.env.VITE_BASE_PATH || '/',
+  base: process.env.NODE_ENV === 'production' ? '/my-website/' : '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
