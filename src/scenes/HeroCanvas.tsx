@@ -6,7 +6,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useIsTouchDevice } from '@/hooks/useIsTouchDevice'
 
 // A hardcoded leading "/" only works when the site is served from the
-// domain root — under GitHub Pages' project-page subpath (/my-website/)
+// domain root — under GitHub Pages' project-page subpath (/de-otter/)
 // it 404s. BASE_URL mirrors vite.config.ts's `base` and always ends in
 // "/", so this resolves correctly in both dev and production.
 const MODEL_URL = `${import.meta.env.BASE_URL}models/sky-otter-adventure.glb`
