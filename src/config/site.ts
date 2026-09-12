@@ -53,12 +53,12 @@ export type PinnedProject = {
 // source instead of a deployment that might be sleeping/torn down.
 export const allProjects: PinnedProject[] = [
   {
-    repo: 'splendor',
-    title: 'Splendor',
+    repo: 'hackforhumanity',
+    title: 'Buddi',
     description:
-      'A Java implementation of the board game Splendor, with 1 shared rule engine powering both a console client and a web client, plus 3 tiers of AI opponents built with the Strategy pattern.',
-    tags: ['Java', 'JavaScript', 'Docker', 'Game AI'],
-    github: 'https://github.com/vanetiaho/splendor',
+      "A healthcare app designed to support people with anorexia during meals. Patients can choose a 3D companion whose appearance changes based on their engagement, without using calories, scores, or punishment. The app also includes a clinician dashboard with AI-assisted meal reviews and care reminders.",
+    tags: ['React', 'Expo', 'AI'],
+    github: 'https://github.com/yinasaurus/hack-for-humanity',
     pinned: true,
   },
   {
@@ -71,26 +71,54 @@ export const allProjects: PinnedProject[] = [
     pinned: true,
   },
   {
+    repo: 'splendor',
+    title: 'Splendor',
+    description:
+      'A Java implementation of the board game Splendor, with 1 shared rule engine powering both a console client and a web client, plus 3 tiers of AI opponents built with the Strategy pattern.',
+    tags: ['Java', 'JavaScript', 'Docker', 'AI'],
+    github: 'https://github.com/vanetiaho/splendor',
+    pinned: true,
+  },
+  {
+    repo: 'ewaste',
+    title: 'ChipCycle',
+    description:
+      'A platform that helps reduce e-waste by giving used laptops a fair market price using a Random Forest model. It also recommends suitable tech products, such as desktop parts, keyboards, phones, and iPads, based on what users need and their budget. The system uses a React chat interface connected to a Flask backend.',
+    tags: ['Python', 'Flask', 'React', 'Machine Learning'],
+    github: 'https://github.com/yinasaurus/e-waste',
+  },
+  {
     repo: 'wad22',
     title: 'Map N Mug',
     description:
       'A Vue + Supabase web app for finding study-friendly cafés. Filter by WiFi, noise, and outlet availability, with a live map, crowd-level updates, reviews, and a gamified rewards system.',
     tags: ['Vue', 'JavaScript', 'Supabase', 'Google Maps API'],
     github: 'https://github.com/vanetiaho/wad22',
-    pinned: true,
   },
   {
     repo: 'dejaview',
     title: 'DejaView',
     description:
       'An AI-powered Chrome extension that passively tracks clothing you browse online, builds a personal fashion closet, and uses generative AI to recommend complementary outfits with virtual try-on.',
-    tags: ['JavaScript', 'Chrome Extension', 'Generative AI'],
+    tags: ['JavaScript', 'Chrome Extension', 'AI'],
     github: 'https://github.com/vanetiaho/dejaview',
   },
 ]
 
 // The featured trio shown on the homepage, in allProjects' order.
 export const pinnedProjects: PinnedProject[] = allProjects.filter((p) => p.pinned)
+
+export type Track = {
+  title: string
+  artist: string
+  // A favorite plays whichever of these it has: a local file under
+  // /public/music, or (if no local file) a link out to the track on
+  // Spotify. `volume` lets a too-loud/quiet master be balanced against
+  // the others (0–1, defaults to 0.55).
+  audioUrl?: string
+  spotifyUrl?: string
+  volume?: number
+}
 
 export const music = {
   // Paste any Spotify share link (track, album, or playlist) — open.spotify.com/...
@@ -103,7 +131,7 @@ export const music = {
     { title: "Love Me Like There's No Tomorrow", artist: 'Freddie Mercury', audioUrl: '/music/track-three.mp3' },
     { title: 'for lovers who hesitate', artist: 'JANNABI', audioUrl: '/music/track-four.mp3' },
     { title: '下凡', artist: 'Pets Tseng', audioUrl: '/music/track-five.mp3' },
-  ],
+  ] as Track[],
 }
 
 export const github = {

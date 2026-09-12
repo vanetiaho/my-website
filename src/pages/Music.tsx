@@ -353,7 +353,7 @@ export default function Music() {
 
           <p className="mt-4 text-center text-sm text-neutral-500">
             {playerSource === 'local'
-              ? 'Playing a favorite from your collection.'
+              ? 'Click the record to play or pause, right here.'
               : uri
                 ? 'Click the record to play or pause, right here.'
                 : 'Add a Spotify link to play a track right here.'}
