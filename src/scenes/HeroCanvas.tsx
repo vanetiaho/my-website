@@ -72,7 +72,7 @@ export default function HeroCanvas() {
   return (
     <Canvas
       shadows
-      camera={{ position: [-1.2, 0.15, 5.4], fov: 42 }}
+      camera={{ position: [0, 0.15, 5.4], fov: 42 }}
       dpr={[1, 1.75]}
       gl={{ antialias: true, alpha: true }}
       style={{ touchAction: 'pan-y' }}
