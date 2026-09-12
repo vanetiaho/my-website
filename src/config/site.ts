@@ -92,7 +92,19 @@ export const allProjects: PinnedProject[] = [
 // The featured trio shown on the homepage, in allProjects' order.
 export const pinnedProjects: PinnedProject[] = allProjects.filter((p) => p.pinned)
 
-export const music = {
+export type FavoriteTrack = {
+  title: string
+  artist: string
+  audioUrl?: string
+  spotifyUrl?: string
+  volume?: number
+}
+
+export const music: {
+  featuredSpotifyUrl: string
+  profileUrl: string
+  favorites: FavoriteTrack[]
+} = {
   // Paste any Spotify share link (track, album, or playlist) — open.spotify.com/...
   // It's converted into an embeddable player automatically.
   featuredSpotifyUrl: 'https://open.spotify.com/playlist/2cQi1uihMnjdxGBvbZSXY1?si=bef4044585c4421e',
