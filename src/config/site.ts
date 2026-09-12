@@ -126,11 +126,11 @@ export const music = {
   featuredSpotifyUrl: 'https://open.spotify.com/playlist/2cQi1uihMnjdxGBvbZSXY1?si=bef4044585c4421e',
   profileUrl: 'https://open.spotify.com/user/21p66homcn5dj3sbrmdlfhfwq',
   favorites: [
-    { title: 'Separate Lives', artist: 'Phil Collins, Marilyn Martin', audioUrl: '/music/track-one.mp3' },
-    { title: 'Make You Feel My Love', artist: 'Bob Dylan', audioUrl: '/music/track-two.mp3' },
-    { title: "Love Me Like There's No Tomorrow", artist: 'Freddie Mercury', audioUrl: '/music/track-three.mp3' },
-    { title: 'for lovers who hesitate', artist: 'JANNABI', audioUrl: '/music/track-four.mp3' },
-    { title: '下凡', artist: 'Pets Tseng', audioUrl: '/music/track-five.mp3' },
+    { title: 'Separate Lives', artist: 'Phil Collins, Marilyn Martin', audioUrl: `${import.meta.env.BASE_URL}music/track-one.mp3` },
+    { title: 'Make You Feel My Love', artist: 'Bob Dylan', audioUrl: `${import.meta.env.BASE_URL}music/track-two.mp3` },
+    { title: "Love Me Like There's No Tomorrow", artist: 'Freddie Mercury', audioUrl: `${import.meta.env.BASE_URL}music/track-three.mp3` },
+    { title: 'for lovers who hesitate', artist: 'JANNABI', audioUrl: `${import.meta.env.BASE_URL}music/track-four.mp3` },
+    { title: '下凡', artist: 'Pets Tseng', audioUrl: `${import.meta.env.BASE_URL}music/track-five.mp3` },
   ] as Track[],
 }
 

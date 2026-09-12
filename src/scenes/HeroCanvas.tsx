@@ -5,7 +5,11 @@ import * as THREE from 'three'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useIsTouchDevice } from '@/hooks/useIsTouchDevice'
 
-const MODEL_URL = '/models/sky-otter-adventure.glb'
+// A hardcoded leading "/" only works when the site is served from the
+// domain root — under GitHub Pages' project-page subpath (/my-website/)
+// it 404s. BASE_URL mirrors vite.config.ts's `base` and always ends in
+// "/", so this resolves correctly in both dev and production.
+const MODEL_URL = `${import.meta.env.BASE_URL}models/sky-otter-adventure.glb`
 
 function OtterPlaneModel(props: ThreeElements['group']) {
   const { scene } = useGLTF(MODEL_URL)
