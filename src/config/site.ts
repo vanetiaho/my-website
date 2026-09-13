@@ -12,7 +12,12 @@ export const profile = {
   bio: `In my “let’s see where this goes” era: learning new things, building little ideas, and collecting experiences along the way. I’m easily distracted by pretty sunsets, planes in the sky, a good soundtrack, and stories I tell myself I’ll watch just one episode of.`,
   location: 'Singapore',
   email: 'vangs.vanetia@gmail.com',
-  avatarUrl: '', // optional headshot / illustration, leave blank for none
+  // Headshot/illustration shown in the About section — expects the file at
+  // public/avatar.png. A hardcoded leading "/" only resolves at a domain
+  // root; under GitHub Pages' project-page subpath it 404s, so this is
+  // built from BASE_URL (matches vite.config.ts's `base`) the same way the
+  // hero model and music tracks are.
+  avatarUrl: `${import.meta.env.BASE_URL}avatar.png`,
 }
 
 export const socials = {
